@@ -1,0 +1,26 @@
+# Môi trường ảo Python
+venv/
+.venv/
+env/
+ENV/
+
+# Tệp lưu thông tin bí mật & khóa API
+.env
+.streamlit/secrets.toml
+
+# Bộ nhớ đệm Python & Streamlit
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Tệp âm thanh tạm thời
+audio_cache/*.mp3
+!audio_cache/.gitkeep
+
+# IDE & Hệ điều hành
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
