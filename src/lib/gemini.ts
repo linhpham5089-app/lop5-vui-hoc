@@ -79,12 +79,12 @@ export async function callGemini(
       }
 
       const data = await res.json();
-      // Extract text safely: filter out thinking-token parts (thoughtSignature only),
-      // then join all actual text parts into one clean string
-      const parts: Array<{ text?: string; thoughtSignature?: string }> =
+      // Extract text safely: exclude internal thinking parts (thought: true),
+      // while keeping answer parts even if they carry a thoughtSignature
+      const parts: Array<{ text?: string; thought?: boolean }> =
         data?.candidates?.[0]?.content?.parts ?? [];
       const text = parts
-        .filter((p) => p.text !== undefined && !p.thoughtSignature?.length)
+        .filter((p) => p.text !== undefined && p.thought !== true)
         .map((p) => p.text as string)
         .join('');
       if (text) {
