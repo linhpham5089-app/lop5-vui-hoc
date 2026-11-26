@@ -23,6 +23,7 @@ import { SUBJECTS } from '@/data/curriculum';
 import { FOUR_SKILLS_QUESTIONS } from '@/data/fourSkillsSeed';
 import { MATH_SEED_QUESTIONS } from '@/data/mathSeed';
 import { FLYERS_SEED_QUESTIONS } from '@/data/flyersSeed';
+import { VIETNAMESE_SEED_QUESTIONS } from '@/data/vietnameseSeed';
 import { speakText, startSpeechRecognition } from '@/lib/speech';
 import { upsertSession } from '@/lib/storage';
 
@@ -60,24 +61,45 @@ export default function PracticeView({
 
     let questions: Question[] = [];
 
-    // Check if it's 4-skills topic
+    // Route questions by subject & topic
     if (selectedTopic.includes('4 Kỹ Năng')) {
       questions = FOUR_SKILLS_QUESTIONS.filter(q => q.subject === selectedSubject);
     } else if (selectedSubject === 'Toán') {
-      questions = MATH_SEED_QUESTIONS;
-    } else if (selectedSubject === 'Tiếng Anh' && selectedTopic.includes('Flyers')) {
-      questions = FLYERS_SEED_QUESTIONS;
-    } else {
-      // Fallback combined seed
-      questions = [
-        ...MATH_SEED_QUESTIONS.filter(q => q.subject === selectedSubject),
-        ...FOUR_SKILLS_QUESTIONS.filter(q => q.subject === selectedSubject),
-        ...FLYERS_SEED_QUESTIONS.filter(q => q.subject === selectedSubject),
-      ];
+      // Filter by topic keyword matching
+      const topicLower = selectedTopic.toLowerCase();
+      const topicFiltered = MATH_SEED_QUESTIONS.filter(q => {
+        const qTopicLower = q.topic.toLowerCase();
+        if (topicLower.includes('thập phân'))  return qTopicLower.includes('thập phân');
+        if (topicLower.includes('phần trăm'))  return qTopicLower.includes('phần trăm');
+        if (topicLower.includes('hình học'))   return qTopicLower.includes('hình học');
+        if (topicLower.includes('chuyển động')) return qTopicLower.includes('chuyển động');
+        if (topicLower.includes('tỉ số'))      return qTopicLower.includes('tỉ số');
+        return true; // "Đề kiểm tra chuẩn" or unrecognised → all questions
+      });
+      questions = topicFiltered.length >= 3 ? topicFiltered : MATH_SEED_QUESTIONS;
+    } else if (selectedSubject === 'Tiếng Anh') {
+      if (selectedTopic.includes('Flyers') || selectedTopic.includes('[Cambridge')) {
+        questions = FLYERS_SEED_QUESTIONS.filter(q => q.subject === 'Tiếng Anh');
+        if (questions.length === 0) questions = FLYERS_SEED_QUESTIONS;
+      } else {
+        questions = FOUR_SKILLS_QUESTIONS.filter(q => q.subject === 'Tiếng Anh');
+      }
+    } else if (selectedSubject === 'Tiếng Việt') {
+      // Try to narrow down by sub-topic keyword, then fall back to all Vietnamese Qs
+      const topicKeyword = selectedTopic.split(':').pop()?.trim().toLowerCase() ?? '';
+      const filtered = VIETNAMESE_SEED_QUESTIONS.filter(q =>
+        topicKeyword.length > 2
+          ? q.topic.toLowerCase().includes(topicKeyword)
+          : true
+      );
+      questions = filtered.length > 0 ? filtered : VIETNAMESE_SEED_QUESTIONS;
+    } else if (selectedSubject === 'Tiếng Trung') {
+      questions = FOUR_SKILLS_QUESTIONS.filter(q => q.subject === 'Tiếng Trung');
     }
 
+    // Final safe fallback — always Vietnamese, never empty English dump
     if (questions.length === 0) {
-      questions = FOUR_SKILLS_QUESTIONS.slice(0, 4);
+      questions = VIETNAMESE_SEED_QUESTIONS;
     }
 
     const newSession: QuizSession = {

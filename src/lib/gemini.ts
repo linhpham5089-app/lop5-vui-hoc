@@ -3,11 +3,15 @@
  * Runs exclusively on server-side Next.js route handlers
  */
 
+// Models verified working as of 2026-11-26:
+// 200 OK: gemini-3.5-flash-lite, gemini-3.5-flash
+// 503 (temporary overload): gemini-3.6-flash, gemini-3.8-flash
+// 404 (discontinued): gemini-2.5-flash, gemini-2.0-flash, gemini-1.5-flash
 const FALLBACK_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-1.5-flash',
-  'gemini-2.0-flash',
-  'gemini-2.5-pro'
+  'gemini-3.5-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-3.6-flash',
+  'gemini-3.8-flash',
 ];
 
 interface GeminiMessage {
@@ -75,7 +79,14 @@ export async function callGemini(
       }
 
       const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      // Extract text safely: filter out thinking-token parts (thoughtSignature only),
+      // then join all actual text parts into one clean string
+      const parts: Array<{ text?: string; thoughtSignature?: string }> =
+        data?.candidates?.[0]?.content?.parts ?? [];
+      const text = parts
+        .filter((p) => p.text !== undefined && !p.thoughtSignature?.length)
+        .map((p) => p.text as string)
+        .join('');
       if (text) {
         return text;
       }
