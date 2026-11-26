@@ -1,10 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { callGemini } from '@/lib/gemini';
-import { Question, SubjectKey } from '@/types';
+import { Question } from '@/types';
+
+export const maxDuration = 15;
+
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_CACHE_ENTRIES = 50;
+
+interface ExamPoolEntry {
+  questions: Question[];
+  createdAt: number;
+}
+
+const examPoolCache = new Map<string, ExamPoolEntry>();
+
+function shuffleQuestions(items: Question[]): Question[] {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function setPoolCache(key: string, questions: Question[]) {
+  const now = Date.now();
+  // Prune expired entries first
+  examPoolCache.forEach((entry, k) => {
+    if (now - entry.createdAt > CACHE_TTL_MS) {
+      examPoolCache.delete(k);
+    }
+  });
+  // Evict oldest if still at capacity
+  if (examPoolCache.size >= MAX_CACHE_ENTRIES) {
+    const oldestKey = examPoolCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      examPoolCache.delete(oldestKey);
+    }
+  }
+  examPoolCache.set(key, { questions, createdAt: now });
+}
 
 export async function POST(req: NextRequest) {
   try {
     const { subject, topic, count = 5 } = await req.json();
+    const requestedCount = Math.max(1, Number(count) || 5);
+    const cacheKey = `${subject}::${topic}`;
+
+    const cached = examPoolCache.get(cacheKey);
+    if (cached && Date.now() - cached.createdAt < CACHE_TTL_MS && cached.questions.length >= requestedCount) {
+      const picked = shuffleQuestions(cached.questions).slice(0, requestedCount);
+      return NextResponse.json({ questions: picked, cached: true });
+    }
+
+    // Pool Cache: generate 10-12 questions when count <= 5 so subsequent requests get varied subsets
+    const poolSize = requestedCount <= 5 ? 10 : requestedCount;
 
     const systemPrompt = `
 Bạn là Chuyên gia Khảo thí và Giáo viên Sư phạm Tiểu học hàng đầu Việt Nam.
@@ -29,7 +79,7 @@ Trả về ĐÚNG MỘT JSON ARRAY chứa các object có cấu trúc:
 TUYỆT ĐỐI KHÔNG VIẾT CHỮ NÀO NGOÀI ĐOẠN JSON. Không kèm markdown block nếu không cần, nếu có dùng \`\`\`json.
 `;
 
-    const userPrompt = `Hãy tạo một bộ đề gồm ${count} câu hỏi bám sát chuẩn Lớp 5 cho môn "${subject}", chủ đề: "${topic}". Đảm bảo có cả câu trắc nghiệm và câu tự luận thú vị.`;
+    const userPrompt = `Hãy tạo một bộ đề gồm ${poolSize} câu hỏi bám sát chuẩn Lớp 5 cho môn "${subject}", chủ đề: "${topic}". Đảm bảo có cả câu trắc nghiệm và câu tự luận thú vị.`;
 
     const raw = await callGemini(userPrompt, systemPrompt);
     
@@ -42,7 +92,12 @@ TUYỆT ĐỐI KHÔNG VIẾT CHỮ NÀO NGOÀI ĐOẠN JSON. Không kèm markdow
     }
 
     const parsed: Question[] = JSON.parse(cleanJson);
-    return NextResponse.json({ questions: parsed });
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setPoolCache(cacheKey, parsed);
+    }
+
+    const picked = shuffleQuestions(parsed).slice(0, requestedCount);
+    return NextResponse.json({ questions: picked, cached: false });
   } catch (error: any) {
     console.error('Generate Exam Error:', error);
     return NextResponse.json(

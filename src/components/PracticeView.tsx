@@ -515,10 +515,19 @@ export default function PracticeView({
                             type="button"
                             disabled={isGrading}
                             onClick={() => handleGradeWithAI(q)}
-                            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition"
+                            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs flex items-center justify-center gap-1.5 transition"
                           >
-                            <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-                            Chấm Phát Âm
+                            {isGrading ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                <span>Đang chấm...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                                <span>Chấm Phát Âm</span>
+                              </>
+                            )}
                           </button>
                         )}
                       </div>
@@ -549,10 +558,19 @@ export default function PracticeView({
                             type="button"
                             disabled={isGrading}
                             onClick={() => handleGradeWithAI(q)}
-                            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 transition"
+                            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs flex items-center gap-1.5 transition"
                           >
-                            <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-                            Nhờ AI Soi Lỗi & Góp Ý
+                            {isGrading ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                <span>Đang chấm...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                                <span>Nhờ AI Soi Lỗi & Góp Ý</span>
+                              </>
+                            )}
                           </button>
                         </div>
                       )}

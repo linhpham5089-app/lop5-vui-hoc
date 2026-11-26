@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { callGemini } from '@/lib/gemini';
 
+export const maxDuration = 15;
+
 export async function POST(req: NextRequest) {
   try {
     const { question, userAnswer, correctAnswer, guide, maxScore = 1.0 } = await req.json();

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { callGemini } from '@/lib/gemini';
 
+export const maxDuration = 15;
+
 const TUTOR_SYSTEM_PROMPT = `
 Bạn là "Cú Vàng Thông Thái" 🦉 - Gia sư AI kiên nhẫn, thân thiện và giàu lòng yêu thương dành riêng cho học sinh tiểu học (từ lớp 1 đến lớp 5).
 

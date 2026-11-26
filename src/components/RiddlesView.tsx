@@ -40,6 +40,7 @@ export default function RiddlesView({ onRewardStars }: RiddlesViewProps) {
     : riddles.filter(r => r.category === activeCategory);
 
   const handleCheck = async (r: Riddle) => {
+    if (isChecking === r.id) return;
     const input = (userInputs[r.id] || '').trim();
     if (!input) {
       alert('Em hãy nhập câu trả lời trước khi bấm kiểm tra nhé!');
@@ -243,7 +244,7 @@ export default function RiddlesView({ onRewardStars }: RiddlesViewProps) {
                     value={userInputs[r.id] || ''}
                     onChange={(e) => setUserInputs({ ...userInputs, [r.id]: e.target.value })}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleCheck(r);
+                      if (e.key === 'Enter' && isChecking !== r.id) handleCheck(r);
                     }}
                     className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pink-500"
                   />

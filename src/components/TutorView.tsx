@@ -189,8 +189,9 @@ export default function TutorView() {
         {quickPrompts.map((q, i) => (
           <button
             key={i}
+            disabled={loading}
             onClick={() => handleSend(q)}
-            className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-purple-300 hover:text-purple-700 hover:bg-purple-50 transition"
+            className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-purple-300 hover:text-purple-700 hover:bg-purple-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             💡 {q}
           </button>

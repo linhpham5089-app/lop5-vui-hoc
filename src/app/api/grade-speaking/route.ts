@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { callGemini } from '@/lib/gemini';
 
+export const maxDuration = 15;
+
 export async function POST(req: NextRequest) {
   try {
     const { expectedText, studentSpeech, phoneticsGuide, subject } = await req.json();
