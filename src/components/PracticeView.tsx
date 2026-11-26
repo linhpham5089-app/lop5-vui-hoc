@@ -136,6 +136,10 @@ export default function PracticeView({
           count: 5
         })
       });
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error(`Server trả về mã ${res.status}`);
+      }
       const data = await res.json();
       if (!res.ok || !Array.isArray(data.questions) || data.questions.length === 0) {
         throw new Error(data.error || 'Không nhận được bộ đề từ AI');

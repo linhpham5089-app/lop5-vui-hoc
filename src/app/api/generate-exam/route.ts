@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { callGemini } from '@/lib/gemini';
 import { Question } from '@/types';
 
-export const maxDuration = 15;
+export const maxDuration = 30;
 
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_CACHE_ENTRIES = 50;
@@ -53,14 +53,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ questions: picked, cached: true });
     }
 
-    // Pool Cache: generate 10-12 questions when count <= 5 so subsequent requests get varied subsets
-    const poolSize = requestedCount <= 5 ? 10 : requestedCount;
+    // Pool Cache: generate 6 questions when count <= 5 so Gemini responds fast (<6s) while still shuffling subsets
+    const poolSize = requestedCount <= 5 ? 6 : requestedCount;
 
     const systemPrompt = `
 Bạn là Chuyên gia Khảo thí và Giáo viên Sư phạm Tiểu học hàng đầu Việt Nam.
 Hãy tạo đề thi ôn tập cho học sinh Lớp 5 theo chủ đề được yêu cầu.
 
-YÊU CẦU ĐỊNH DẠNG:
+YÊU CẦU ĐỊNH DẠNG (viết ngắn gọn, súc tích 1-2 câu cho mỗi lời giải thích để phản hồi nhanh):
 Trả về ĐÚNG MỘT JSON ARRAY chứa các object có cấu trúc:
 [
   {
@@ -71,9 +71,9 @@ Trả về ĐÚNG MỘT JSON ARRAY chứa các object có cấu trúc:
     "question": "Nội dung câu hỏi...",
     "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
     "correct_answer": "A",
-    "explanation": "Lời giải thích chi tiết, dễ hiểu cho học sinh lớp 5...",
-    "grammar_clue": "Manh mối hoặc công thức nhận biết...",
-    "encouragement": "Lời khen ngợi kích lệ..."
+    "explanation": "Lời giải thích ngắn gọn, dễ hiểu...",
+    "grammar_clue": "Công thức hoặc mẹo nhận biết ngắn...",
+    "encouragement": "Lời khen khích lệ..."
   }
 ]
 TUYỆT ĐỐI KHÔNG VIẾT CHỮ NÀO NGOÀI ĐOẠN JSON. Không kèm markdown block nếu không cần, nếu có dùng \`\`\`json.

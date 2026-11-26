@@ -38,6 +38,13 @@ export function addStars(count: number): UserStats {
   return updated;
 }
 
+export function incrementSolvedRiddles(): UserStats {
+  const current = getSavedStats();
+  const updated = { ...current, solvedRiddles: (current.solvedRiddles || 0) + 1 };
+  saveStats(updated);
+  return updated;
+}
+
 export function getSavedSessions(): QuizSession[] {
   if (typeof window === 'undefined') return [];
   try {
@@ -57,12 +64,19 @@ export function saveSessions(sessions: QuizSession[]) {
 export function upsertSession(session: QuizSession) {
   const sessions = getSavedSessions();
   const idx = sessions.findIndex(s => s.id === session.id);
+  const wasCompleted = idx >= 0 && sessions[idx].status === 'completed';
+
   if (idx >= 0) {
     sessions[idx] = session;
   } else {
     sessions.unshift(session);
   }
   saveSessions(sessions);
+
+  if (session.status === 'completed' && !wasCompleted) {
+    const current = getSavedStats();
+    saveStats({ ...current, completedQuizzes: (current.completedQuizzes || 0) + 1 });
+  }
 }
 
 export function getSavedQuests(): DailyQuest[] {

@@ -13,7 +13,7 @@ import {
   Trophy
 } from 'lucide-react';
 import { Riddle } from '@/types';
-import { getSavedRiddles, saveRiddles, completeQuest } from '@/lib/storage';
+import { getSavedRiddles, saveRiddles, completeQuest, incrementSolvedRiddles } from '@/lib/storage';
 
 interface RiddlesViewProps {
   onRewardStars: (count: number) => void;
@@ -84,6 +84,7 @@ export default function RiddlesView({ onRewardStars }: RiddlesViewProps) {
         if (!r.is_solved) {
           r.is_solved = true;
           saveRiddles([...riddles]);
+          incrementSolvedRiddles();
           onRewardStars(1);
           completeQuest('q3'); // Complete riddle daily quest
         }
@@ -102,6 +103,7 @@ export default function RiddlesView({ onRewardStars }: RiddlesViewProps) {
       if (isMatch && !r.is_solved) {
         r.is_solved = true;
         saveRiddles([...riddles]);
+        incrementSolvedRiddles();
         onRewardStars(1);
       }
     } finally {
