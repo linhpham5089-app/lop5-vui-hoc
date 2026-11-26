@@ -314,5 +314,119 @@ export const VIETNAMESE_SEED_QUESTIONS: Question[] = [
     grammar_clue: 'So sánh tóc bạc "như mây", ánh mắt "như ánh nắng" tạo hình ảnh sinh động, không sáo rỗng.',
     encouragement: 'Đoạn tả người thật ấm áp và sinh động! Em viết văn rất có hồn! ✍️❤️',
     points: 3.0
+  },
+
+  // ====================================================================
+  // CHỦ ĐỀ BỔ SUNG HK1: TỪ LOẠI, CHỦ NGỮ, THÀNH NGỮ Ý CHÍ, ĐỒNG NGHĨA
+  // ====================================================================
+  {
+    id: 'vi_16',
+    subject: 'Tiếng Việt',
+    topic: 'Luyện từ và câu: Ôn tập về từ loại (Danh - Động - Tính từ)',
+    type: 'mcq',
+    question: 'Trong câu "Những chú chim sơn ca cất tiếng hót vang lừng trên bầu trời xanh thẳm", bộ phận CHỦ NGỮ là:',
+    options: [
+      'A. Những chú chim',
+      'B. Những chú chim sơn ca',
+      'C. cất tiếng hót vang lừng',
+      'D. trên bầu trời xanh thẳm'
+    ],
+    correct_answer: 'B',
+    explanation:
+      'Đặt câu hỏi "Con gì cất tiếng hót vang lừng trên bầu trời xanh thẳm?" → Trả lời: "Những chú chim sơn ca". Đó chính là chủ ngữ của câu.',
+    grammar_clue: 'Chủ ngữ thường trả lời cho câu hỏi Ai? Cái gì? Con gì? và đứng trước vị ngữ.',
+    encouragement: 'Xác định chủ ngữ rất chắc chắn! Tuyệt vời em! 🌟',
+    points: 1.0
+  },
+  {
+    id: 'vi_17',
+    subject: 'Tiếng Việt',
+    topic: 'Luyện từ và câu: Ôn tập về từ loại (Danh - Động - Tính từ)',
+    type: 'mcq',
+    question: 'Dòng nào dưới đây gồm toàn các TÍNH TỪ?',
+    options: [
+      'A. chạy, nhảy, xanh biếc, dịu dàng',
+      'B. chăm chỉ, rực rỡ, thơm ngát, hiền hậu',
+      'C. học sinh, bàn ghế, vui vẻ, ngoan ngoãn',
+      'D. suy nghĩ, lắng nghe, chăm chú, cẩn thận'
+    ],
+    correct_answer: 'B',
+    explanation:
+      'Cả 4 từ "chăm chỉ, rực rỡ, thơm ngát, hiền hậu" đều chỉ tính chất, đặc điểm nên đều là tính từ. Các phương án khác có lẫn động từ (chạy, nhảy, suy nghĩ...) hoặc danh từ (học sinh, bàn ghế).',
+    grammar_clue: 'Tính từ miêu tả đặc điểm, tính chất của sự vật, hoạt động, trạng thái.',
+    encouragement: 'Phân biệt Danh - Động - Tính từ quá chuẩn luôn! 👏',
+    points: 1.0
+  },
+  {
+    id: 'vi_18',
+    subject: 'Tiếng Việt',
+    topic: 'Thành ngữ, tục ngữ và nét đẹp văn hóa Việt Nam',
+    type: 'mcq',
+    question: 'Thành ngữ nào dưới đây nói về đức tính CHĂM CHỈ, chịu khó lao động?',
+    options: [
+      'A. Một nắng hai sương',
+      'B. Nước chảy đá mòn',
+      'C. Cả A và B đều đúng',
+      'D. Thẳng như ruột ngựa'
+    ],
+    correct_answer: 'C',
+    explanation:
+      '"Một nắng hai sương" ca ngợi sự vất vả, cần cù lao động từ sáng sớm đến tối mịt; "Nước chảy đá mòn" khuyên kiên trì, nhẫn nại ắt thành công. "Thẳng như ruột ngựa" chỉ tính ngay thẳng.',
+    grammar_clue: 'Thành ngữ về ý chí/chăm chỉ thường gặp: Một nắng hai sương, Chịu thương chịu khó, Thức khuya dậy sớm, Tích tiểu thành đại.',
+    encouragement: 'Hiểu sâu sắc ý nghĩa thành ngữ về đức tính tốt đẹp! 🌟',
+    points: 1.0
+  },
+  {
+    id: 'vi_19',
+    subject: 'Tiếng Việt',
+    topic: 'Thành ngữ, tục ngữ và nét đẹp văn hóa Việt Nam',
+    type: 'essay',
+    question: 'Em hãy giải thích ngắn gọn nghĩa của thành ngữ "Tích tiểu thành đại" và đặt 1 câu với thành ngữ đó.',
+    guide: 'Gợi ý: "Tiểu" là nhỏ, "đại" là lớn. Góp nhặt những cái nhỏ bé lâu ngày sẽ thành lớn lao.',
+    correct_answer:
+      'Nghĩa: Góp nhặt những việc nhỏ, điều nhỏ bé lâu ngày sẽ tạo nên kết quả lớn lao. Câu mẫu: "Mỗi ngày em đều tiết kiệm một ít tiền bỏ lợn đất, đúng là tích tiểu thành đại."',
+    explanation:
+      'Thành ngữ khuyên chúng ta biết trân trọng từng cố gắng nhỏ mỗi ngày trong học tập và cuộc sống.',
+    grammar_clue: 'Giải thích từ Hán Việt: tiểu (nhỏ), đại (lớn), tích (góp lại).',
+    encouragement: 'Giải thích rõ ràng và đặt câu rất tự nhiên! ✍️🌟',
+    points: 2.0
+  },
+  {
+    id: 'vi_20',
+    subject: 'Tiếng Việt',
+    topic: 'Mở rộng vốn từ: Tổ quốc, Nhân dân, Hòa bình',
+    type: 'mcq',
+    question: 'Từ nào dưới đây ĐỒNG NGHĨA với từ "hạnh phúc"?',
+    options: [
+      'A. bất hạnh',
+      'B. sung sướng',
+      'C. buồn bã',
+      'D. lo âu'
+    ],
+    correct_answer: 'B',
+    explanation:
+      '"Sung sướng" cùng nghĩa với "hạnh phúc" (cảm giác vui vẻ, toại nguyện). "Bất hạnh" là từ trái nghĩa với "hạnh phúc".',
+    grammar_clue: 'Tìm từ đồng nghĩa bằng cách đặt thử vào cùng một câu xem nghĩa có giữ nguyên không.',
+    encouragement: 'Chọn từ đồng nghĩa cực nhanh và chính xác! 🌟',
+    points: 1.0
+  },
+  {
+    id: 'vi_21',
+    subject: 'Tiếng Việt',
+    topic: 'Mở rộng vốn từ: Tổ quốc, Nhân dân, Hòa bình',
+    type: 'mcq',
+    question: 'Nhóm từ nào dưới đây gồm toàn các từ thể hiện "lòng thương người"?',
+    options: [
+      'A. nhân hậu, nhân ái, vị tha, bao dung',
+      'B. dũng cảm, gan dạ, kiên cường, anh dũng',
+      'C. trung thực, thật thà, thẳng thắn, ngay thẳng',
+      'D. siêng năng, cần cù, chịu khó, chăm chỉ'
+    ],
+    correct_answer: 'A',
+    explanation:
+      'Nhóm A (nhân hậu, nhân ái, vị tha, bao dung) đều chỉ tình cảm yêu thương, cảm thông với mọi người.',
+    grammar_clue: 'Các từ có tiếng "nhân" (người), "ái" (yêu thương), "từ" (hiền từ) thường thuộc nhóm lòng thương người.',
+    encouragement: 'Phân loại từ theo chủ điểm quá giỏi! 👏',
+    points: 1.0
   }
 ];

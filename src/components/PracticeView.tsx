@@ -46,6 +46,7 @@ export default function PracticeView({
   const [isRecording, setIsRecording] = useState<string | number | null>(null);
   const [speechRecStop, setSpeechRecStop] = useState<(() => void) | null>(null);
   const [isGrading, setIsGrading] = useState<boolean>(false);
+  const [isGeneratingExam, setIsGeneratingExam] = useState<boolean>(false);
   const [aiFeedbacks, setAiFeedbacks] = useState<Record<string | number, any>>({});
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
@@ -69,6 +70,7 @@ export default function PracticeView({
       const topicLower = selectedTopic.toLowerCase();
       const topicFiltered = MATH_SEED_QUESTIONS.filter(q => {
         const qTopicLower = q.topic.toLowerCase();
+        if (topicLower.includes('phân số'))    return qTopicLower.includes('phân số');
         if (topicLower.includes('thập phân'))  return qTopicLower.includes('thập phân');
         if (topicLower.includes('phần trăm'))  return qTopicLower.includes('phần trăm');
         if (topicLower.includes('hình học'))   return qTopicLower.includes('hình học');
@@ -114,6 +116,57 @@ export default function PracticeView({
 
     setCurrentSession(newSession);
     upsertSession(newSession);
+  };
+
+  // Generate fresh exam questions on-demand via Gemini API
+  const handleGenerateAIExam = async () => {
+    if (isGeneratingExam) return;
+    setIsGeneratingExam(true);
+    setIsSubmitted(false);
+    setUserAnswers({});
+    setAiFeedbacks({});
+
+    try {
+      const res = await fetch('/api/generate-exam', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: selectedSubject,
+          topic: selectedTopic,
+          count: 5
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !Array.isArray(data.questions) || data.questions.length === 0) {
+        throw new Error(data.error || 'Không nhận được bộ đề từ AI');
+      }
+
+      const generatedQuestions: Question[] = data.questions.map((q: Question, idx: number) => ({
+        ...q,
+        id: `ai_${Date.now()}_${idx}`,
+        subject: selectedSubject,
+        topic: selectedTopic,
+        points: q.points || 1.0
+      }));
+
+      const newSession: QuizSession = {
+        id: `session_${Date.now()}`,
+        created_at: new Date().toISOString(),
+        subject: selectedSubject,
+        topic: `${selectedTopic} (AI Tạo Mới)`,
+        status: 'in_progress',
+        questions: generatedQuestions,
+        answers: {}
+      };
+
+      setCurrentSession(newSession);
+      upsertSession(newSession);
+    } catch (err) {
+      console.error(err);
+      alert('Chưa thể tạo đề mới bằng AI lúc này. Em hãy thử lại sau vài giây hoặc bấm "Bắt Đầu Làm Bài" với kho đề có sẵn nhé!');
+    } finally {
+      setIsGeneratingExam(false);
+    }
   };
 
   const handleSelectOption = (qId: string | number, optLetter: string) => {
@@ -329,13 +382,31 @@ export default function PracticeView({
             </select>
           </div>
 
-          <div className="sm:self-end">
+          <div className="sm:self-end flex flex-col sm:flex-row gap-2">
             <button
               onClick={startQuiz}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-md shadow-purple-200 transition transform active:scale-95 flex items-center justify-center gap-2"
+              disabled={isGeneratingExam}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white font-bold text-sm shadow-md shadow-purple-200 transition transform active:scale-95 flex items-center justify-center gap-2"
             >
               <Play className="w-4 h-4 fill-white" />
               Bắt Đầu Làm Bài
+            </button>
+            <button
+              onClick={handleGenerateAIExam}
+              disabled={isGeneratingExam}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md shadow-indigo-200 transition transform active:scale-95 flex items-center justify-center gap-2"
+            >
+              {isGeneratingExam ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Đang tạo đề...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 text-yellow-300" />
+                  <span>✨ AI Tạo Đề Mới Theo Chủ Đề</span>
+                </>
+              )}
             </button>
           </div>
         </div>
