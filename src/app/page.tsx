@@ -10,6 +10,7 @@ import RiddlesView from '@/components/RiddlesView';
 import HistoryView from '@/components/HistoryView';
 import ProgressView from '@/components/ProgressView';
 import ParentView from '@/components/ParentView';
+import VisitorCounter from '@/components/VisitorCounter';
 import { UserStats, DailyQuest, SubjectKey, QuizSession, StudentProfile } from '@/types';
 import {
   getSavedStats,
@@ -139,8 +140,9 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Top Auto-Identified Student Machine Bar (No Login Required) */}
-        <div className="px-4 sm:px-6 lg:px-8 pt-3 flex flex-wrap items-center justify-end gap-2 print:hidden">
+        {/* Top Auto-Identified Student Machine Bar & Live Visitor Counter (No Login Required) */}
+        <div className="px-4 sm:px-6 lg:px-8 pt-3 flex flex-wrap items-center justify-between gap-2 print:hidden">
+          <VisitorCounter />
           <div className="inline-flex flex-wrap items-center gap-2 bg-white border border-slate-200/90 shadow-sm rounded-full px-3.5 py-1.5 text-xs">
             <Monitor className="w-3.5 h-3.5 text-purple-600 shrink-0" />
             <span className="text-slate-500 font-medium">Máy học sinh:</span>
