@@ -63,6 +63,7 @@ export default function PracticeView({
   const [aiHints, setAiHints] = useState<Record<string | number, string>>({});
   const [hintLoadingId, setHintLoadingId] = useState<string | number | null>(null);
   const [summaryStats, setSummaryStats] = useState<QuizSummaryStats | null>(null);
+  const [submitCount, setSubmitCount] = useState<number>(0);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -72,6 +73,7 @@ export default function PracticeView({
   // Load or generate questions for the topic
   const startQuiz = async () => {
     setIsSubmitted(false);
+    setSubmitCount(0);
     setUserAnswers({});
     setAiFeedbacks({});
     setAiHints({});
@@ -142,6 +144,7 @@ export default function PracticeView({
     if (isGeneratingExam) return;
     setIsGeneratingExam(true);
     setIsSubmitted(false);
+    setSubmitCount(0);
     setUserAnswers({});
     setAiFeedbacks({});
     setAiHints({});
@@ -379,6 +382,9 @@ export default function PracticeView({
     const roundedMax = Math.round(maxScore * 10) / 10;
     const penaltyPoints = Math.round(blankCount * UNANSWERED_PENALTY * 10) / 10;
 
+    const nextSubmitCount = submitCount + 1;
+    setSubmitCount(nextSubmitCount);
+
     setSummaryStats({
       correctCount,
       wrongCount,
@@ -396,7 +402,7 @@ export default function PracticeView({
       max_score: roundedMax,
       mcq_correct: mcqCorrect,
       mcq_total: mcqTotal,
-      ai_summary: `Hoàn thành ${currentSession.subject}: ${finalScore}/${roundedMax} điểm (Đúng: ${correctCount}, Sai: ${wrongCount}, Bỏ trống: ${blankCount}).`
+      ai_summary: `Hoàn thành ${currentSession.subject} (Lần ${nextSubmitCount}/3): ${finalScore}/${roundedMax} điểm (Đúng: ${correctCount}, Sai: ${wrongCount}, Bỏ trống: ${blankCount}).`
     };
 
     setCurrentSession(updatedSession);
@@ -415,6 +421,23 @@ export default function PracticeView({
         origin: { y: 0.6 }
       });
     } catch (e) {}
+  };
+
+  // Retry keeping existing answers (allowed up to 2 retries = 3 total submissions)
+  const handleRetryQuiz = () => {
+    if (submitCount >= 3) return;
+    setIsSubmitted(false);
+  };
+
+  // Switch to another topic / exam after exhausting retries
+  const handleSwitchNewExam = () => {
+    setCurrentSession(null);
+    setSubmitCount(0);
+    setIsSubmitted(false);
+    setUserAnswers({});
+    setAiFeedbacks({});
+    setAiHints({});
+    setSummaryStats(null);
   };
 
   return (
@@ -436,6 +459,8 @@ export default function PracticeView({
                 onClick={() => {
                   setSelectedSubject(subKey);
                   setCurrentSession(null);
+                  setSubmitCount(0);
+                  setIsSubmitted(false);
                 }}
                 className={`
                   flex items-center gap-3 p-3.5 rounded-2xl border font-bold text-sm transition-all text-left
@@ -462,6 +487,8 @@ export default function PracticeView({
               onChange={(e) => {
                 setSelectedTopic(e.target.value);
                 setCurrentSession(null);
+                setSubmitCount(0);
+                setIsSubmitted(false);
               }}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white font-medium text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
@@ -530,15 +557,33 @@ export default function PracticeView({
             <div className="bg-white rounded-3xl p-6 border-2 border-purple-200 shadow-sm space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-purple-600">
-                    📊 Bảng Tổng Kết Điểm
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-purple-600">
+                      📊 Bảng Tổng Kết Điểm
+                    </span>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                      Lần nộp {submitCount}/3
+                    </span>
+                  </div>
                   <h4 className="text-2xl font-black text-slate-800 mt-0.5">
                     Tổng điểm: <span className="text-purple-700">{summaryStats.totalScore}</span> / {summaryStats.maxScore} điểm
                   </h4>
                   <p className="text-xs text-slate-500 mt-1">
                     Quy tắc chấm: Đúng cộng điểm • Sai 0 điểm • Bỏ trống trừ {UNANSWERED_PENALTY} điểm/câu (tối thiểu 0 điểm)
                   </p>
+                </div>
+
+                {/* Remaining retries / auto-unlock notice */}
+                <div className={`px-4 py-2.5 rounded-2xl border text-xs font-bold ${
+                  submitCount === 1
+                    ? 'bg-indigo-50 border-indigo-200 text-indigo-800'
+                    : submitCount === 2
+                    ? 'bg-amber-50 border-amber-200 text-amber-800'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                }`}>
+                  {submitCount === 1 && '🔄 Bạn còn 2 lượt làm lại để cải thiện điểm số!'}
+                  {submitCount === 2 && '⚠️ Bạn còn 1 lượt làm lại cuối cùng để cải thiện điểm số!'}
+                  {submitCount >= 3 && '🔓 Đã hết 2 lượt làm lại — Đã mở khóa đáp án chuẩn & lời giải chi tiết!'}
                 </div>
               </div>
 
@@ -637,11 +682,14 @@ export default function PracticeView({
                         const isCorrectAnswer = q.correct_answer === letter;
 
                         let optClasses = 'border-slate-200 hover:bg-slate-50 text-slate-700';
+                        const showSolutions = isSubmitted && submitCount >= 3;
                         if (isSubmitted) {
-                          if (isChosen && isCorrectAnswer) {
+                          if (showSolutions && isCorrectAnswer) {
+                            optClasses = 'border-emerald-500 bg-emerald-50 text-emerald-900 font-bold ring-2 ring-emerald-500/20';
+                          } else if (isChosen && isCorrectAnswer) {
                             optClasses = 'border-emerald-500 bg-emerald-50 text-emerald-900 font-bold ring-2 ring-emerald-500/20';
                           } else if (isChosen && !isCorrectAnswer) {
-                            optClasses = 'border-rose-500 bg-rose-50 text-rose-900 font-bold ring-2 ring-rose-500/20';
+                            optClasses = `border-rose-500 bg-rose-50 text-rose-900 font-bold ring-2 ring-rose-500/20 ${showSolutions ? 'line-through' : ''}`;
                           } else {
                             optClasses = 'border-slate-200 bg-slate-50/50 text-slate-400 opacity-75';
                           }
@@ -823,24 +871,54 @@ export default function PracticeView({
                     </div>
                   )}
 
-                  {/* Status badge only after submit — never reveal correct answer or solution */}
+                  {/* Status badge after submit; unlock full solution only on 3rd submission */}
                   {isSubmitted && (
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                      {ansRecord?.is_correct ? (
-                        <span className="inline-flex items-center gap-1.5 font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-                          <CheckCircle className="w-3.5 h-3.5" />
-                          Đúng (+{ansRecord.score} điểm)
-                        </span>
-                      ) : isBlank ? (
-                        <span className="inline-flex items-center gap-1.5 font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-                          <AlertCircle className="w-3.5 h-3.5" />
-                          Bỏ trống (-{UNANSWERED_PENALTY} điểm) — Hãy thử làm lại nhé!
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 font-bold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full">
-                          <AlertCircle className="w-3.5 h-3.5" />
-                          Chưa chính xác (0 điểm) — Hãy suy nghĩ và thử lại nhé!
-                        </span>
+                    <div className="mt-4 pt-3 border-t border-slate-100 space-y-2.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        {ansRecord?.is_correct ? (
+                          <span className="inline-flex items-center gap-1.5 font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            Đúng (+{ansRecord.score} điểm)
+                          </span>
+                        ) : isBlank ? (
+                          <span className="inline-flex items-center gap-1.5 font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            Bỏ trống (-{UNANSWERED_PENALTY} điểm){submitCount < 3 ? ' — Hãy thử làm lại nhé!' : ''}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 font-bold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            Chưa chính xác (0 điểm){submitCount < 3 ? ' — Hãy suy nghĩ và thử lại nhé!' : ''}
+                          </span>
+                        )}
+                      </div>
+
+                      {submitCount >= 3 && (
+                        <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-1 text-slate-700">
+                          <p className="font-bold text-emerald-800">
+                            ✅ Đáp án chuẩn: {q.correct_answer}
+                          </p>
+                          {q.explanation && (
+                            <p className="leading-relaxed">
+                              📖 Giải thích: {q.explanation}
+                            </p>
+                          )}
+                          {q.grammar_clue && (
+                            <p className="text-indigo-700 font-medium">
+                              🔍 Manh mối: {q.grammar_clue}
+                            </p>
+                          )}
+                          {fb?.suggestedAnswer && (
+                            <p className="text-slate-700 font-mono bg-white/80 p-2 rounded-lg">
+                              Gợi ý câu chuẩn: {fb.suggestedAnswer}
+                            </p>
+                          )}
+                          {q.encouragement && (
+                            <p className="text-amber-700 font-bold">
+                              🌟 {q.encouragement}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
@@ -849,11 +927,17 @@ export default function PracticeView({
             })}
           </div>
 
-          {/* Bottom Action: Submit */}
-          <div className="sticky bottom-4 z-20 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200 shadow-xl flex items-center justify-between">
+          {/* Bottom Action: Submit / Retry / Switch Exam */}
+          <div className="sticky bottom-4 z-20 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200 shadow-xl flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 font-medium">
-                {isSubmitted ? 'Bài thi đã được chấm điểm hoàn tất!' : 'Đã điền đủ câu hỏi? Hãy nộp bài nhé!'}
+              <span className="text-xs text-slate-600 font-semibold">
+                {!isSubmitted
+                  ? `Lần nộp ${submitCount + 1}/3 — Đã làm xong? Hãy nộp bài nhé!`
+                  : submitCount === 1
+                  ? 'Bạn còn 2 lượt làm lại để sửa câu sai hoặc bổ sung câu bỏ trống.'
+                  : submitCount === 2
+                  ? 'Bạn còn 1 lượt làm lại cuối cùng trước khi hệ thống mở đáp án.'
+                  : 'Đã hoàn thành tối đa 3 lần nộp và mở khóa toàn bộ lời giải!'}
               </span>
             </div>
 
@@ -865,13 +949,21 @@ export default function PracticeView({
                 <Send className="w-4 h-4" />
                 Nộp Bài & Chấm Điểm
               </button>
-            ) : (
+            ) : submitCount < 3 ? (
               <button
-                onClick={startQuiz}
-                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-sm shadow-md shadow-purple-200 flex items-center gap-2 transition"
+                onClick={handleRetryQuiz}
+                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-sm shadow-md shadow-purple-200 flex items-center gap-2 transition transform active:scale-95"
               >
                 <RotateCcw className="w-4 h-4" />
-                Làm Lại Bộ Đề Này
+                Làm lại bài (Còn {3 - submitCount} lượt)
+              </button>
+            ) : (
+              <button
+                onClick={handleSwitchNewExam}
+                className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-md shadow-indigo-200 flex items-center gap-2 transition"
+              >
+                <BookOpen className="w-4 h-4" />
+                Chuyển sang đề mới / bài khác
               </button>
             )}
           </div>
