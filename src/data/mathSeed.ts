@@ -181,5 +181,107 @@ export const MATH_SEED_QUESTIONS: Question[] = [
     correct_answer: 'B',
     explanation: 'Diện tích hình thang = (đáy lớn + đáy bé) × chiều cao : 2 = (45 + 35) × 20 : 2 = 800 m².',
     points: 1.0
+  },
+  // Bài thi chuẩn của Hồ Chí Minh (Toán)
+  {
+    id: 'm_hcm_1',
+    subject: 'Toán',
+    topic: 'Bài thi chuẩn của Hồ Chí Minh',
+    type: 'mcq',
+    question: 'Một siêu thị ở TP.HCM niêm yết giá 1 hộp sữa tươi là 32 000 đồng. Nhân dịp cuối tuần, siêu thị giảm giá 15%. Số tiền người mua được giảm là:',
+    options: ['A. 3 200 đồng', 'B. 4 800 đồng', 'C. 5 200 đồng', 'D. 27 200 đồng'],
+    correct_answer: 'B',
+    explanation: 'Số tiền được giảm = 32 000 × 15 : 100 = 4 800 (đồng).',
+    points: 1.0
+  },
+  {
+    id: 'm_hcm_2',
+    subject: 'Toán',
+    topic: 'Bài thi chuẩn của Hồ Chí Minh',
+    type: 'mcq',
+    question: 'Số thích hợp điền vào chỗ chấm: 4 m³ 25 dm³ = ...... m³',
+    options: ['A. 4,25', 'B. 4,025', 'C. 4,250', 'D. 42,5'],
+    correct_answer: 'B',
+    explanation: '1 m³ = 1000 dm³ nên 25 dm³ = 0,025 m³. Vậy 4 m³ 25 dm³ = 4,025 m³.',
+    points: 1.0
+  },
+  {
+    id: 'm_hcm_3',
+    subject: 'Toán',
+    topic: 'Bài thi chuẩn của Hồ Chí Minh',
+    type: 'essay',
+    question: 'Một bể cá dạng hình hộp chữ nhật có chiều dài 1,2 m, chiều rộng 0,6 m và chiều cao 0,8 m. Tính thể tích nước trong bể khi mực nước cao bằng 3/4 chiều cao của bể.',
+    guide: 'Bước 1: Tính chiều cao mực nước = 0,8 × 3/4.\nBước 2: Thể tích nước = dài × rộng × cao mực nước.',
+    correct_answer: 'Chiều cao mực nước: 0,6 m. Thể tích nước: 1,2 × 0,6 × 0,6 = 0,432 m³ (432 lít).',
+    explanation: 'Chiều cao mực nước = 0,8 × 3/4 = 0,6 m. Thể tích nước = 1,2 × 0,6 × 0,6 = 0,432 m³.',
+    points: 2.0
+  },
+  // Bài thi chuẩn của Trần Đại Nghĩa (Toán tư duy)
+  {
+    id: 'm_tdn_1',
+    subject: 'Toán',
+    topic: 'Bài thi chuẩn của Trần Đại Nghĩa',
+    type: 'mcq',
+    question: 'Cho dãy số theo quy luật: 2; 6; 12; 20; 30; ... Số hạng thứ 8 của dãy là:',
+    options: ['A. 56', 'B. 64', 'C. 72', 'D. 90'],
+    correct_answer: 'C',
+    explanation: 'Quy luật: số hạng thứ n bằng n × (n + 1). Số hạng thứ 8 = 8 × 9 = 72.',
+    points: 1.0
+  },
+  {
+    id: 'm_tdn_2',
+    subject: 'Toán',
+    topic: 'Bài thi chuẩn của Trần Đại Nghĩa',
+    type: 'mcq',
+    question: 'Một đồng hồ treo tường chạy nhanh 3 phút mỗi giờ. Lúc 6 giờ sáng, người ta chỉnh đồng hồ theo giờ đúng. Hỏi khi đồng hồ đó chỉ 12 giờ trưa cùng ngày thì giờ đúng là mấy giờ?',
+    options: ['A. 11 giờ 42 phút', 'B. 11 giờ 45 phút', 'C. 11 giờ 42 phút 51 giây', 'D. 12 giờ 18 phút'],
+    correct_answer: 'C',
+    explanation: 'Mỗi giờ thực tế (60 phút), đồng hồ chạy được 63 phút. Từ 6h đến 12h trên đồng hồ là 360 phút đồng hồ → thời gian thực = 360 × 60 / 63 ≈ 342,86 phút = 5 giờ 42 phút 51 giây → 11 giờ 42 phút 51 giây.',
+    points: 1.5
+  },
+  {
+    id: 'm_tdn_3',
+    subject: 'Toán',
+    topic: 'Bài thi chuẩn của Trần Đại Nghĩa',
+    type: 'essay',
+    question: 'Trong một buổi ngoại khóa, cô giáo chia kẹo cho các bạn. Nếu mỗi bạn 4 viên thì thừa 5 viên; nếu mỗi bạn 5 viên thì thiếu 7 viên. Hỏi có bao nhiêu bạn và bao nhiêu viên kẹo?',
+    guide: 'Tìm hiệu số kẹo mỗi bạn (5 - 4 = 1 viên) và tổng số kẹo chênh lệch (5 + 7 = 12 viên).',
+    correct_answer: 'Số bạn: (5 + 7) : (5 - 4) = 12 bạn. Số kẹo: 12 × 4 + 5 = 53 viên.',
+    explanation: 'Số bạn = (5 + 7) : (5 - 4) = 12 (bạn). Số viên kẹo = 12 × 4 + 5 = 53 (viên).',
+    points: 2.0
+  },
+  // Bài thi tổng hợp (Toán)
+  {
+    id: 'm_th_1',
+    subject: 'Toán',
+    topic: 'Bài thi tổng hợp',
+    type: 'mcq',
+    question: 'Giá trị của biểu thức 12,5 × 0,4 + 7,5 : 2,5 là:',
+    options: ['A. 8', 'B. 7', 'C. 9', 'D. 10'],
+    correct_answer: 'A',
+    explanation: '12,5 × 0,4 = 5; 7,5 : 2,5 = 3. Tổng = 5 + 3 = 8.',
+    points: 1.0
+  },
+  {
+    id: 'm_th_2',
+    subject: 'Toán',
+    topic: 'Bài thi tổng hợp',
+    type: 'mcq',
+    question: 'Một ô tô đi từ A lúc 7 giờ 15 phút với vận tốc 54 km/giờ và đến B lúc 9 giờ 45 phút. Quãng đường AB dài là:',
+    options: ['A. 120 km', 'B. 135 km', 'C. 145 km', 'D. 108 km'],
+    correct_answer: 'B',
+    explanation: 'Thời gian đi = 9h45 - 7h15 = 2 giờ 30 phút = 2,5 giờ. Quãng đường = 54 × 2,5 = 135 km.',
+    points: 1.0
+  },
+  {
+    id: 'm_th_3',
+    subject: 'Toán',
+    topic: 'Bài thi tổng hợp',
+    type: 'essay',
+    question: 'Một hình tròn có chu vi bằng 31,4 cm. Tính diện tích của hình tròn đó.',
+    guide: 'Bước 1: Tìm bán kính r = Chu vi : 3,14 : 2.\nBước 2: Diện tích S = r × r × 3,14.',
+    correct_answer: 'Bán kính r = 31,4 : 3,14 : 2 = 5 cm. Diện tích = 5 × 5 × 3,14 = 78,5 cm².',
+    explanation: 'r = 31,4 : 3,14 : 2 = 5 (cm). Diện tích = 5 × 5 × 3,14 = 78,5 (cm²).',
+    points: 2.0
   }
 ];

@@ -428,5 +428,140 @@ export const VIETNAMESE_SEED_QUESTIONS: Question[] = [
     grammar_clue: 'Các từ có tiếng "nhân" (người), "ái" (yêu thương), "từ" (hiền từ) thường thuộc nhóm lòng thương người.',
     encouragement: 'Phân loại từ theo chủ điểm quá giỏi! 👏',
     points: 1.0
+  },
+  // Bài thi chuẩn của Hồ Chí Minh (Tiếng Việt)
+  {
+    id: 'vi_hcm_1',
+    subject: 'Tiếng Việt',
+    topic: 'Bài thi chuẩn của Hồ Chí Minh',
+    type: 'mcq',
+    question: 'Trong câu "Sài Gòn – Thành phố Hồ Chí Minh rực rỡ ánh đèn mỗi khi đêm xuống", từ nào là ĐỘNG TỪ?',
+    options: ['A. rực rỡ', 'B. ánh đèn', 'C. xuống', 'D. thành phố'],
+    correct_answer: 'C',
+    explanation: '"Xuống" chỉ hoạt động/trạng thái chuyển động của thời gian (đêm xuống). "Rực rỡ" là tính từ; "ánh đèn", "thành phố" là danh từ.',
+    grammar_clue: 'Động từ chỉ hoạt động, trạng thái của sự vật.',
+    encouragement: 'Xác định từ loại rất chuẩn xác! 🌟',
+    points: 1.0
+  },
+  {
+    id: 'vi_hcm_2',
+    subject: 'Tiếng Việt',
+    topic: 'Bài thi chuẩn của Hồ Chí Minh',
+    type: 'mcq',
+    question: 'Câu ghép "Tuy đường phố đông đúc nhưng dòng xe vẫn di chuyển nhịp nhàng" sử dụng cặp quan hệ từ biểu thị ý nghĩa gì?',
+    options: ['A. Nguyên nhân – kết quả', 'B. Giả thiết – kết quả', 'C. Tương phản', 'D. Tăng tiến'],
+    correct_answer: 'C',
+    explanation: 'Cặp quan hệ từ "Tuy... nhưng..." biểu thị mối quan hệ tương phản giữa hai vế câu.',
+    grammar_clue: 'Tuy... nhưng... / Mặc dù... nhưng... luôn chỉ quan hệ tương phản.',
+    encouragement: 'Nắm vững cấu trúc câu ghép lắm em! 👏',
+    points: 1.0
+  },
+  {
+    id: 'vi_hcm_3',
+    subject: 'Tiếng Việt',
+    topic: 'Bài thi chuẩn của Hồ Chí Minh',
+    type: 'essay',
+    question: 'Em hãy viết 3–4 câu tả cảnh góc phố hoặc sân trường em vào buổi sáng, trong đó có sử dụng 1 câu ghép.',
+    guide: 'Gợi ý: Có thể dùng cặp quan hệ từ (vì... nên..., tuy... nhưng...) hoặc dấu phẩy để nối hai vế câu ghép.',
+    correct_answer: 'Ví dụ: "Buổi sáng, sân trường em ngập tràn nắng vàng. Tiếng trống vang lên rộn rã và các bạn học sinh nhanh chóng xếp hàng ngay ngắn."',
+    explanation: 'Đoạn văn đúng chủ đề, có đủ số câu và sử dụng đúng ít nhất 1 câu ghép.',
+    grammar_clue: 'Câu ghép có ít nhất hai cụm Chủ – Vị không bao chứa nhau.',
+    encouragement: 'Đoạn văn mượt mà và giàu hình ảnh! ✍️🌟',
+    points: 2.0
+  },
+  // Bài thi chuẩn của Trần Đại Nghĩa (Tiếng Việt tư duy & cảm thụ)
+  {
+    id: 'vi_tdn_1',
+    subject: 'Tiếng Việt',
+    topic: 'Bài thi chuẩn của Trần Đại Nghĩa',
+    type: 'mcq',
+    question: 'Từ "chín" trong câu nào dưới đây mang NGHĨA CHUYỂN?',
+    options: [
+      'A. Vườn cam sau nhà đã chín vàng rực.',
+      'B. Nồi cơm vừa chín tới, thơm lừng cả gian bếp.',
+      'C. Trước khi quyết định việc lớn, em cần suy nghĩ cho chín.',
+      'D. Mùa thu về, những chùm ổi chín rộ.'
+    ],
+    correct_answer: 'C',
+    explanation: '"Suy nghĩ cho chín" dùng từ "chín" với nghĩa chuyển: suy nghĩ kỹ càng, thấu đáo, đầy đủ.',
+    grammar_clue: 'Nghĩa gốc của "chín" chỉ trạng thái quả/thức ăn đã đến độ ăn được.',
+    encouragement: 'Cảm nhận từ nhiều nghĩa cực kỳ tinh tế! 🌟',
+    points: 1.0
+  },
+  {
+    id: 'vi_tdn_2',
+    subject: 'Tiếng Việt',
+    topic: 'Bài thi chuẩn của Trần Đại Nghĩa',
+    type: 'mcq',
+    question: 'Đọc câu: "Cánh diều no gió bay vút lên tầng mây xanh." Biện pháp nghệ thuật nổi bật nhất trong cụm từ "no gió" là gì?',
+    options: ['A. So sánh', 'B. Nhân hóa', 'C. Điệp ngữ', 'D. Nói quá'],
+    correct_answer: 'B',
+    explanation: '"No" vốn là trạng thái của con người/động vật; dùng "no gió" cho cánh diều là biện pháp nhân hóa rất sinh động.',
+    grammar_clue: 'Nhân hóa gán đặc điểm, cảm giác của người cho đồ vật.',
+    encouragement: 'Cảm thụ văn học sắc bén lắm! 👏',
+    points: 1.0
+  },
+  {
+    id: 'vi_tdn_3',
+    subject: 'Tiếng Việt',
+    topic: 'Bài thi chuẩn của Trần Đại Nghĩa',
+    type: 'essay',
+    question: 'Vì sao có người nói: "Một lời khen đúng lúc có thể thắp sáng cả một ngày của người khác"? Em hãy viết 3–4 câu nêu suy nghĩ của mình.',
+    guide: 'Nêu ý nghĩa tích cực của lời khen chân thành đối với tinh thần và sự tự tin của mọi người.',
+    correct_answer: 'Ví dụ: "Lời khen chân thành giúp người nghe cảm thấy được ghi nhận và có thêm động lực cố gắng. Khi ai đó đang mệt mỏi, một lời động viên kịp thời sẽ mang lại niềm vui ấm áp."',
+    explanation: 'Trình bày rõ ràng ý nghĩa nhân văn của sự khích lệ, lời nói tích cực trong giao tiếp.',
+    grammar_clue: 'Nêu lý do + ví dụ ngắn gọn để đoạn văn thuyết phục.',
+    encouragement: 'Suy nghĩ sâu sắc và nhân ái lắm em! ❤️✍️',
+    points: 2.0
+  },
+  // Bài thi tổng hợp (Tiếng Việt)
+  {
+    id: 'vi_th_1',
+    subject: 'Tiếng Việt',
+    topic: 'Bài thi tổng hợp',
+    type: 'mcq',
+    question: 'Cặp từ nào dưới đây là cặp TỪ ĐỒNG ÂM?',
+    options: [
+      'A. đường (đi lại) – đường (gia vị ngọt)',
+      'B. chăm chỉ – siêng năng',
+      'C. cao – thấp',
+      'D. mũi (người) – mũi (thuyền)'
+    ],
+    correct_answer: 'A',
+    explanation: '"Đường" (lối đi) và "đường" (chất ngọt) phát âm giống hệt nhau nhưng nghĩa hoàn toàn khác nhau → từ đồng âm. Câu D là từ nhiều nghĩa.',
+    grammar_clue: 'Từ đồng âm khác hẳn nhau về nghĩa; từ nhiều nghĩa vẫn có nét nghĩa liên quan.',
+    encouragement: 'Phân biệt từ đồng âm và từ nhiều nghĩa quá chuẩn! 🌟',
+    points: 1.0
+  },
+  {
+    id: 'vi_th_2',
+    subject: 'Tiếng Việt',
+    topic: 'Bài thi tổng hợp',
+    type: 'mcq',
+    question: 'Xác định TRẠNG NGỮ trong câu: "Dưới ánh nắng ban mai, những giọt sương long lanh như ngọc."',
+    options: [
+      'A. những giọt sương',
+      'B. long lanh như ngọc',
+      'C. Dưới ánh nắng ban mai',
+      'D. ban mai'
+    ],
+    correct_answer: 'C',
+    explanation: '"Dưới ánh nắng ban mai" trả lời cho câu hỏi "Ở đâu / Trong điều kiện nào?", đứng trước dấu phẩy là thành phần trạng ngữ.',
+    grammar_clue: 'Trạng ngữ thường đứng đầu câu, ngăn cách với nòng cốt câu bởi dấu phẩy.',
+    encouragement: 'Nắm chắc cấu tạo câu Tiếng Việt! 👏',
+    points: 1.0
+  },
+  {
+    id: 'vi_th_3',
+    subject: 'Tiếng Việt',
+    topic: 'Bài thi tổng hợp',
+    type: 'essay',
+    question: 'Đặt 1 câu có cặp quan hệ từ biểu thị quan hệ ĐIỀU KIỆN – KẾT QUẢ (Nếu... thì... hoặc Hễ... thì...).',
+    guide: 'Ví dụ về việc học tập hoặc bảo vệ môi trường.',
+    correct_answer: 'Ví dụ: "Nếu chúng ta chăm chỉ trồng nhiều cây xanh thì không khí sẽ ngày càng trong lành hơn."',
+    explanation: 'Câu sử dụng đúng cặp quan hệ từ điều kiện – kết quả và có hai vế rõ ràng.',
+    grammar_clue: 'Nếu [điều kiện] thì [kết quả].',
+    encouragement: 'Đặt câu rất chuẩn và ý nghĩa! ✍️🌟',
+    points: 2.0
   }
 ];

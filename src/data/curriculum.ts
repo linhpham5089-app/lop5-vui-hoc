@@ -13,7 +13,10 @@ export const SUBJECTS: Record<SubjectKey, SubjectConfig> = {
       'Hình học: Diện tích hình tam giác, hình thang, hình tròn',
       'Hình học: Thể tích hình hộp chữ nhật, hình lập phương',
       'Toán chuyển động đều: Vận tốc, quãng đường, thời gian',
-      'Đề kiểm tra chuẩn 10 bài Toán (thang điểm 10)'
+      'Đề kiểm tra chuẩn 10 bài Toán (thang điểm 10)',
+      'Bài thi chuẩn của Hồ Chí Minh',
+      'Bài thi chuẩn của Trần Đại Nghĩa',
+      'Bài thi tổng hợp'
     ]
   },
   'Tiếng Việt': {
@@ -27,7 +30,10 @@ export const SUBJECTS: Record<SubjectKey, SubjectConfig> = {
       'Luyện từ và câu: Ôn tập về từ loại (Danh - Động - Tính từ)',
       'Tập làm văn: Lập dàn ý bài văn tả cảnh thiên nhiên',
       'Tập làm văn: Miêu tả người (thầy cô, người thân)',
-      'Thành ngữ, tục ngữ và nét đẹp văn hóa Việt Nam'
+      'Thành ngữ, tục ngữ và nét đẹp văn hóa Việt Nam',
+      'Bài thi chuẩn của Hồ Chí Minh',
+      'Bài thi chuẩn của Trần Đại Nghĩa',
+      'Bài thi tổng hợp'
     ]
   },
   'Tiếng Anh': {
@@ -43,7 +49,10 @@ export const SUBJECTS: Record<SubjectKey, SubjectConfig> = {
       '🏆 [Cambridge Flyers] Dạng 3: Flyers Grammar (Ngữ pháp A2: Quá khứ, HTHT, Mệnh đề quan hệ)',
       '🏆 [Cambridge Flyers] Dạng 4: Story Reading & Cloze (Đọc hiểu đoạn văn & Chọn từ)',
       '🏆 [Cambridge Flyers] Dạng 5: Open Cloze (Tự suy luận và điền 1 từ chính xác)',
-      '🏆 [Cambridge Flyers] Đề thi thử Tổng hợp A2 Flyers'
+      '🏆 [Cambridge Flyers] Đề thi thử Tổng hợp A2 Flyers',
+      'Bài thi chuẩn của Hồ Chí Minh',
+      'Bài thi chuẩn của Trần Đại Nghĩa',
+      'Bài thi tổng hợp'
     ]
   },
   'Tiếng Trung': {
@@ -58,7 +67,10 @@ export const SUBJECTS: Record<SubjectKey, SubjectConfig> = {
       'Chào hỏi, giới thiệu bản thân và xưng hô trong gia đình',
       'Số đếm từ 1-100, ngày tháng, thứ trong tuần và giờ giấc',
       'Đồ dùng học tập, màu sắc và sở thích cơ bản (喜欢, 学习)',
-      'Hỏi giá cả và mua sắm đơn giản (多少钱, 苹果)'
+      'Hỏi giá cả và mua sắm đơn giản (多少钱, 苹果)',
+      'Bài thi chuẩn của Hồ Chí Minh',
+      'Bài thi chuẩn của Trần Đại Nghĩa',
+      'Bài thi tổng hợp'
     ]
   }
 };

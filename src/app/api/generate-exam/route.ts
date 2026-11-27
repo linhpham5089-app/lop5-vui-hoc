@@ -41,6 +41,20 @@ function setPoolCache(key: string, questions: Question[]) {
   examPoolCache.set(key, { questions, createdAt: now });
 }
 
+function getExamStyleGuidance(subject: string, topic: string): string {
+  const t = topic.toLowerCase();
+  if (t.includes('hồ chí minh')) {
+    return `ĐẶC THÙ ĐỀ THI: Bám sát chương trình giáo dục phổ thông của Bộ GD&ĐT và cấu trúc đề kiểm tra/khảo sát chuẩn của Sở GD&ĐT TP.HCM (tính thực tế cao, tình huống đời sống rõ ràng, chuẩn mực cho môn ${subject} Lớp 5).`;
+  }
+  if (t.includes('trần đại nghĩa')) {
+    return `ĐẶC THÙ ĐỀ THI: Chuẩn kỳ khảo sát năng lực vào lớp 6 Trường THCS-THPT Trần Đại Nghĩa (TP.HCM). Tăng cường câu hỏi tư duy logic, suy luận nhanh, giải quyết vấn đề thực tiễn, đọc hiểu và vận dụng sáng tạo phù hợp môn ${subject} (Toán tư duy, Tiếng Việt cảm thụ/ngôn ngữ, Tiếng Anh giao tiếp/tư duy, Tiếng Trung thực hành).`;
+  }
+  if (t.includes('bài thi tổng hợp')) {
+    return `ĐẶC THÙ ĐỀ THI: Đề ôn tập tổng hợp toàn diện môn ${subject} Lớp 5, phối hợp đều các mảng kiến thức trọng tâm từ cơ bản đến nâng cao.`;
+  }
+  return '';
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { subject, topic, count = 5 } = await req.json();
@@ -79,7 +93,8 @@ Trả về ĐÚNG MỘT JSON ARRAY chứa các object có cấu trúc:
 TUYỆT ĐỐI KHÔNG VIẾT CHỮ NÀO NGOÀI ĐOẠN JSON. Không kèm markdown block nếu không cần, nếu có dùng \`\`\`json.
 `;
 
-    const userPrompt = `Hãy tạo một bộ đề gồm ${poolSize} câu hỏi bám sát chuẩn Lớp 5 cho môn "${subject}", chủ đề: "${topic}". Đảm bảo có cả câu trắc nghiệm và câu tự luận thú vị.`;
+    const styleGuidance = getExamStyleGuidance(subject, topic);
+    const userPrompt = `Hãy tạo một bộ đề gồm ${poolSize} câu hỏi bám sát chuẩn Lớp 5 cho môn "${subject}", chủ đề: "${topic}". ${styleGuidance} Đảm bảo có cả câu trắc nghiệm và câu tự luận thú vị.`;
 
     const raw = await callGemini(userPrompt, systemPrompt);
     

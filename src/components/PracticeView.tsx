@@ -86,7 +86,22 @@ export default function PracticeView({
     let questions: Question[] = [];
 
     // Route questions by subject & topic
-    if (selectedTopic.includes('4 Kỹ Năng')) {
+    const isStandardExamTopic =
+      selectedTopic === 'Bài thi chuẩn của Hồ Chí Minh' ||
+      selectedTopic === 'Bài thi chuẩn của Trần Đại Nghĩa' ||
+      selectedTopic === 'Bài thi tổng hợp';
+
+    if (isStandardExamTopic) {
+      const subjectPool =
+        selectedSubject === 'Toán'
+          ? MATH_SEED_QUESTIONS
+          : selectedSubject === 'Tiếng Việt'
+          ? VIETNAMESE_SEED_QUESTIONS
+          : selectedSubject === 'Tiếng Anh'
+          ? [...FLYERS_SEED_QUESTIONS, ...FOUR_SKILLS_QUESTIONS.filter(q => q.subject === 'Tiếng Anh')]
+          : FOUR_SKILLS_QUESTIONS.filter(q => q.subject === 'Tiếng Trung');
+      questions = subjectPool.filter(q => q.topic === selectedTopic);
+    } else if (selectedTopic.includes('4 Kỹ Năng')) {
       questions = FOUR_SKILLS_QUESTIONS.filter(q => q.subject === selectedSubject);
     } else if (selectedSubject === 'Toán') {
       // Filter by topic keyword matching
