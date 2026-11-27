@@ -59,30 +59,28 @@ export default function HistoryView() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-slate-700">Câu {idx + 1} ({q.points || 1.0} điểm)</span>
-                    {q.type === 'mcq' && (
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
-                        {isCorrect ? 'Chính xác' : 'Chưa đúng'}
-                      </span>
-                    )}
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                      isCorrect
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : !ans?.user_answer
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-rose-100 text-rose-800'
+                    }`}>
+                      {isCorrect ? 'Đúng' : !ans?.user_answer ? 'Bỏ trống' : 'Chưa chính xác'}
+                    </span>
                   </div>
 
                   <p className="font-semibold text-slate-800">{q.question}</p>
 
                   <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs space-y-1">
                     <p className="text-slate-600">
-                      <strong>Câu trả lời của em:</strong> {ans?.user_answer || '(Chưa điền)'}
-                    </p>
-                    <p className="text-emerald-700">
-                      <strong>Đáp án chuẩn:</strong> {q.correct_answer}
+                      <strong>Câu trả lời của em:</strong> {ans?.user_answer || '(Bỏ trống)'}
                     </p>
                     {ans?.ai_feedback && (
                       <p className="text-indigo-700">
                         <strong>AI Nhận xét:</strong> {ans.ai_feedback}
                       </p>
                     )}
-                    <p className="text-slate-500 pt-1 border-t border-slate-100">
-                      <strong>Giải thích:</strong> {q.explanation}
-                    </p>
                   </div>
                 </div>
               );
