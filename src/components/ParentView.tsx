@@ -406,7 +406,7 @@ export default function ParentView({
       <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm overflow-x-auto">
         <h3 className="font-extrabold text-base text-slate-800 mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-purple-600" />
-          <span>Bảng Lịch Sử Chi Tiết Từng Lần Nộp (Lần 1 → Lần 2 → Lần 3)</span>
+          <span>Bảng Lịch Sử Điểm Ban Đầu & Sau Khi Sửa Câu Sai</span>
         </h3>
 
         {completedSessions.length === 0 ? (
@@ -419,9 +419,8 @@ export default function ParentView({
               <tr className="border-b border-slate-200 text-slate-500 text-xs uppercase">
                 <th className="py-3 px-2">Thời gian</th>
                 <th className="py-3 px-2">Môn / Chuyên đề</th>
-                <th className="py-3 px-2 text-center">Lần 1</th>
-                <th className="py-3 px-2 text-center">Lần 2</th>
-                <th className="py-3 px-2 text-center">Lần 3</th>
+                <th className="py-3 px-2 text-center">Điểm ban đầu</th>
+                <th className="py-3 px-2 text-center">Sau sửa câu</th>
                 <th className="py-3 px-2 text-center">Tiến bộ</th>
                 <th className="py-3 px-2 text-center">Bỏ trống</th>
               </tr>
@@ -430,7 +429,6 @@ export default function ParentView({
               {completedSessions.map((s) => {
                 const a1 = s.attempts?.find(a => a.attemptNumber === 1);
                 const a2 = s.attempts?.find(a => a.attemptNumber === 2);
-                const a3 = s.attempts?.find(a => a.attemptNumber === 3);
                 const last = s.attempts && s.attempts.length > 0 ? s.attempts[s.attempts.length - 1] : null;
                 const firstScore = a1 ? a1.totalScore : (s.total_score ?? 0);
                 const lastScore = last ? last.totalScore : (s.total_score ?? 0);
@@ -448,11 +446,8 @@ export default function ParentView({
                     <td className="py-3 px-2 text-center font-bold">
                       {a1 ? `${a1.totalScore}/${a1.maxScore}` : `${s.total_score ?? 0}/${s.max_score ?? 0}`}
                     </td>
-                    <td className="py-3 px-2 text-center font-bold text-indigo-700">
-                      {a2 ? `${a2.totalScore}/${a2.maxScore}` : '—'}
-                    </td>
                     <td className="py-3 px-2 text-center font-bold text-emerald-700">
-                      {a3 ? `${a3.totalScore}/${a3.maxScore}` : '—'}
+                      {a2 ? `${a2.totalScore}/${a2.maxScore}` : '—'}
                     </td>
                     <td className="py-3 px-2 text-center font-bold">
                       {delta > 0 ? (

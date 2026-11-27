@@ -63,7 +63,8 @@ export default function PracticeView({
   const [aiHints, setAiHints] = useState<Record<string | number, string>>({});
   const [hintLoadingId, setHintLoadingId] = useState<string | number | null>(null);
   const [summaryStats, setSummaryStats] = useState<QuizSummaryStats | null>(null);
-  const [submitCount, setSubmitCount] = useState<number>(0);
+  const [retryingQuestions, setRetryingQuestions] = useState<Record<string | number, boolean>>({});
+  const [retriedQuestions, setRetriedQuestions] = useState<Record<string | number, boolean>>({});
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -73,7 +74,8 @@ export default function PracticeView({
   // Load or generate questions for the topic
   const startQuiz = async () => {
     setIsSubmitted(false);
-    setSubmitCount(0);
+    setRetryingQuestions({});
+    setRetriedQuestions({});
     setUserAnswers({});
     setAiFeedbacks({});
     setAiHints({});
@@ -144,7 +146,8 @@ export default function PracticeView({
     if (isGeneratingExam) return;
     setIsGeneratingExam(true);
     setIsSubmitted(false);
-    setSubmitCount(0);
+    setRetryingQuestions({});
+    setRetriedQuestions({});
     setUserAnswers({});
     setAiFeedbacks({});
     setAiHints({});
@@ -198,12 +201,12 @@ export default function PracticeView({
   };
 
   const handleSelectOption = (qId: string | number, optLetter: string) => {
-    if (isSubmitted) return;
+    if (isSubmitted && !retryingQuestions[qId]) return;
     setUserAnswers(prev => ({ ...prev, [qId]: optLetter }));
   };
 
   const handleTextAnswer = (qId: string | number, text: string) => {
-    if (isSubmitted) return;
+    if (isSubmitted && !retryingQuestions[qId]) return;
     setUserAnswers(prev => ({ ...prev, [qId]: text }));
   };
 
@@ -382,9 +385,6 @@ export default function PracticeView({
     const roundedMax = Math.round(maxScore * 10) / 10;
     const penaltyPoints = Math.round(blankCount * UNANSWERED_PENALTY * 10) / 10;
 
-    const nextSubmitCount = submitCount + 1;
-    setSubmitCount(nextSubmitCount);
-
     setSummaryStats({
       correctCount,
       wrongCount,
@@ -395,8 +395,8 @@ export default function PracticeView({
     });
 
     const profile = getSavedProfile();
-    const newAttempt: AttemptRecord = {
-      attemptNumber: nextSubmitCount,
+    const initialAttempt: AttemptRecord = {
+      attemptNumber: 1,
       submittedAt: new Date().toISOString(),
       totalScore: finalScore,
       maxScore: roundedMax,
@@ -417,13 +417,15 @@ export default function PracticeView({
       profile_code: profile.profileCode,
       device_id: profile.deviceId,
       student_ip: profile.ip,
-      attempts: [...(currentSession.attempts || []), newAttempt],
-      ai_summary: `Hoàn thành ${currentSession.subject} (Lần ${nextSubmitCount}/3): ${finalScore}/${roundedMax} điểm (Đúng: ${correctCount}, Sai: ${wrongCount}, Bỏ trống: ${blankCount}).`
+      attempts: [initialAttempt],
+      ai_summary: `Hoàn thành ${currentSession.subject}: ${finalScore}/${roundedMax} điểm (Đúng: ${correctCount}, Sai: ${wrongCount}, Bỏ trống: ${blankCount}).`
     };
 
     setCurrentSession(updatedSession);
     upsertSession(updatedSession);
     setIsSubmitted(true);
+    setRetryingQuestions({});
+    setRetriedQuestions({});
 
     // Reward stars & trigger confetti
     const earnedStars = Math.max(1, Math.round(finalScore / 2));
@@ -439,16 +441,132 @@ export default function PracticeView({
     } catch (e) {}
   };
 
-  // Retry keeping existing answers (allowed up to 2 retries = 3 total submissions)
-  const handleRetryQuiz = () => {
-    if (submitCount >= 3) return;
-    setIsSubmitted(false);
+  // Unlock a single wrong or blank question for its 1 allowed retry
+  const handleStartSingleRetry = (qId: string | number) => {
+    if (retriedQuestions[qId]) return;
+    setRetryingQuestions(prev => ({ ...prev, [qId]: true }));
   };
 
-  // Switch to another topic / exam after exhausting retries
+  // Grade a single question's 1-time retry, update total score & sync to ParentView, and permanently lock + reveal solution
+  const handleCheckSingleRetry = (q: Question) => {
+    if (!currentSession || retriedQuestions[q.id]) return;
+
+    const uAns = (userAnswers[q.id] || '').trim();
+    const isBlank = uAns.length === 0;
+    const p = q.points || 1.0;
+
+    let updatedAns: SessionAnswer;
+    if (isBlank) {
+      updatedAns = {
+        user_answer: '',
+        is_correct: false,
+        score: -UNANSWERED_PENALTY,
+        max_score: p
+      };
+    } else if (q.type === 'mcq') {
+      const isCorrect = uAns.toUpperCase() === (q.correct_answer || '').trim().toUpperCase();
+      updatedAns = {
+        user_answer: uAns,
+        is_correct: isCorrect,
+        score: isCorrect ? p : 0,
+        max_score: p
+      };
+    } else {
+      const fb = aiFeedbacks[q.id];
+      const essayScore = fb?.score !== undefined ? Number(fb.score) : (uAns.length > 5 ? p * 0.8 : 0);
+      const isCorrect = essayScore >= p * 0.5;
+      updatedAns = {
+        user_answer: uAns,
+        is_correct: isCorrect,
+        score: essayScore,
+        max_score: p,
+        ai_feedback: fb?.feedback || fb?.phoneticsAdvice || ''
+      };
+    }
+
+    const updatedAnswers: Record<string | number, SessionAnswer> = {
+      ...currentSession.answers,
+      [q.id]: updatedAns,
+    };
+
+    // Recalculate full quiz totals
+    let rawScore = 0;
+    let maxScore = 0;
+    let mcqCorrect = 0;
+    let mcqTotal = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let blankCount = 0;
+
+    currentSession.questions.forEach((item) => {
+      const itemPoints = item.points || 1.0;
+      maxScore += itemPoints;
+      const ans = updatedAnswers[item.id];
+      const itemBlank = !(ans?.user_answer || '').trim();
+
+      if (item.type === 'mcq') mcqTotal += 1;
+
+      if (itemBlank) {
+        blankCount += 1;
+        rawScore -= UNANSWERED_PENALTY;
+      } else if (ans?.is_correct) {
+        correctCount += 1;
+        if (item.type === 'mcq') mcqCorrect += 1;
+        rawScore += Number(ans.score ?? itemPoints);
+      } else {
+        wrongCount += 1;
+        rawScore += Number(ans?.score ?? 0);
+      }
+    });
+
+    const finalScore = Math.max(0, Math.round(rawScore * 10) / 10);
+    const roundedMax = Math.round(maxScore * 10) / 10;
+    const penaltyPoints = Math.round(blankCount * UNANSWERED_PENALTY * 10) / 10;
+
+    setSummaryStats({
+      correctCount,
+      wrongCount,
+      blankCount,
+      penaltyPoints,
+      totalScore: finalScore,
+      maxScore: roundedMax
+    });
+
+    const firstAttempt = currentSession.attempts?.[0];
+    const postRetryAttempt: AttemptRecord = {
+      attemptNumber: 2,
+      submittedAt: new Date().toISOString(),
+      totalScore: finalScore,
+      maxScore: roundedMax,
+      correctCount,
+      wrongCount,
+      blankCount,
+      penaltyPoints,
+    };
+
+    const updatedSession: QuizSession = {
+      ...currentSession,
+      answers: updatedAnswers,
+      total_score: finalScore,
+      max_score: roundedMax,
+      mcq_correct: mcqCorrect,
+      mcq_total: mcqTotal,
+      attempts: firstAttempt ? [firstAttempt, postRetryAttempt] : [postRetryAttempt],
+      ai_summary: `Hoàn thành ${currentSession.subject} (Đã sửa câu sai): ${finalScore}/${roundedMax} điểm (Đúng: ${correctCount}, Sai: ${wrongCount}, Bỏ trống: ${blankCount}).`
+    };
+
+    setRetryingQuestions(prev => ({ ...prev, [q.id]: false }));
+    setRetriedQuestions(prev => ({ ...prev, [q.id]: true }));
+    setCurrentSession(updatedSession);
+    upsertSession(updatedSession);
+    onSessionFinished();
+  };
+
+  // Switch to another topic / exam
   const handleSwitchNewExam = () => {
     setCurrentSession(null);
-    setSubmitCount(0);
+    setRetryingQuestions({});
+    setRetriedQuestions({});
     setIsSubmitted(false);
     setUserAnswers({});
     setAiFeedbacks({});
@@ -475,7 +593,8 @@ export default function PracticeView({
                 onClick={() => {
                   setSelectedSubject(subKey);
                   setCurrentSession(null);
-                  setSubmitCount(0);
+                  setRetryingQuestions({});
+                  setRetriedQuestions({});
                   setIsSubmitted(false);
                 }}
                 className={`
@@ -503,7 +622,8 @@ export default function PracticeView({
               onChange={(e) => {
                 setSelectedTopic(e.target.value);
                 setCurrentSession(null);
-                setSubmitCount(0);
+                setRetryingQuestions({});
+                setRetriedQuestions({});
                 setIsSubmitted(false);
               }}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white font-medium text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -573,14 +693,9 @@ export default function PracticeView({
             <div className="bg-white rounded-3xl p-6 border-2 border-purple-200 shadow-sm space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-purple-600">
-                      📊 Bảng Tổng Kết Điểm
-                    </span>
-                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800">
-                      Lần nộp {submitCount}/3
-                    </span>
-                  </div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-purple-600">
+                    📊 Bảng Tổng Kết Điểm
+                  </span>
                   <h4 className="text-2xl font-black text-slate-800 mt-0.5">
                     Tổng điểm: <span className="text-purple-700">{summaryStats.totalScore}</span> / {summaryStats.maxScore} điểm
                   </h4>
@@ -589,17 +704,8 @@ export default function PracticeView({
                   </p>
                 </div>
 
-                {/* Remaining retries / auto-unlock notice */}
-                <div className={`px-4 py-2.5 rounded-2xl border text-xs font-bold ${
-                  submitCount === 1
-                    ? 'bg-indigo-50 border-indigo-200 text-indigo-800'
-                    : submitCount === 2
-                    ? 'bg-amber-50 border-amber-200 text-amber-800'
-                    : 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                }`}>
-                  {submitCount === 1 && '🔄 Bạn còn 2 lượt làm lại để cải thiện điểm số!'}
-                  {submitCount === 2 && '⚠️ Bạn còn 1 lượt làm lại cuối cùng để cải thiện điểm số!'}
-                  {submitCount >= 3 && '🔓 Đã hết 2 lượt làm lại — Đã mở khóa đáp án chuẩn & lời giải chi tiết!'}
+                <div className="px-4 py-2.5 rounded-2xl border bg-indigo-50 border-indigo-200 text-indigo-800 text-xs font-bold">
+                  💡 Các câu sai hoặc bỏ trống có thể bấm &quot;Làm lại câu này (còn 1 lượt)&quot; ngay bên dưới!
                 </div>
               </div>
 
@@ -630,6 +736,10 @@ export default function PracticeView({
               const hintText = aiHints[q.id];
               const ansRecord = currentSession.answers?.[q.id];
               const isBlank = uAns.trim().length === 0;
+              const isRetryingThis = !!retryingQuestions[q.id];
+              const hasRetriedThis = !!retriedQuestions[q.id];
+              const isQuestionLocked = isSubmitted && !isRetryingThis;
+              const showQuestionSolution = isSubmitted && hasRetriedThis;
 
               return (
                 <div
@@ -698,14 +808,13 @@ export default function PracticeView({
                         const isCorrectAnswer = q.correct_answer === letter;
 
                         let optClasses = 'border-slate-200 hover:bg-slate-50 text-slate-700';
-                        const showSolutions = isSubmitted && submitCount >= 3;
-                        if (isSubmitted) {
-                          if (showSolutions && isCorrectAnswer) {
+                        if (isQuestionLocked) {
+                          if (showQuestionSolution && isCorrectAnswer) {
                             optClasses = 'border-emerald-500 bg-emerald-50 text-emerald-900 font-bold ring-2 ring-emerald-500/20';
                           } else if (isChosen && isCorrectAnswer) {
                             optClasses = 'border-emerald-500 bg-emerald-50 text-emerald-900 font-bold ring-2 ring-emerald-500/20';
                           } else if (isChosen && !isCorrectAnswer) {
-                            optClasses = `border-rose-500 bg-rose-50 text-rose-900 font-bold ring-2 ring-rose-500/20 ${showSolutions ? 'line-through' : ''}`;
+                            optClasses = `border-rose-500 bg-rose-50 text-rose-900 font-bold ring-2 ring-rose-500/20 ${showQuestionSolution ? 'line-through' : ''}`;
                           } else {
                             optClasses = 'border-slate-200 bg-slate-50/50 text-slate-400 opacity-75';
                           }
@@ -716,7 +825,7 @@ export default function PracticeView({
                         return (
                           <button
                             key={opt}
-                            disabled={isSubmitted}
+                            disabled={isQuestionLocked}
                             onClick={() => handleSelectOption(q.id, letter)}
                             className={`p-3 rounded-xl border text-left text-sm transition font-medium flex items-center gap-2.5 ${optClasses}`}
                           >
@@ -769,13 +878,14 @@ export default function PracticeView({
 
                         <input
                           type="text"
+                          disabled={isQuestionLocked}
                           placeholder="Câu nói của em sẽ hiện ở đây hoặc em có thể gõ vào..."
                           value={uAns}
                           onChange={(e) => handleTextAnswer(q.id, e.target.value)}
-                          className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-slate-50"
                         />
 
-                        {!isSubmitted && (
+                        {!isQuestionLocked && (
                           <button
                             type="button"
                             disabled={isGrading}
@@ -812,12 +922,12 @@ export default function PracticeView({
                         rows={3}
                         placeholder="Nhập câu trả lời hoặc đoạn văn của em vào đây..."
                         value={uAns}
-                        disabled={isSubmitted}
+                        disabled={isQuestionLocked}
                         onChange={(e) => handleTextAnswer(q.id, e.target.value)}
-                        className="w-full p-3.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full p-3.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-slate-50"
                       />
 
-                      {!isSubmitted && (
+                      {!isQuestionLocked && (
                         <div className="flex justify-end">
                           <button
                             type="button"
@@ -843,7 +953,7 @@ export default function PracticeView({
                   )}
 
                   {/* Per-question Hint Action */}
-                  {!isSubmitted && (
+                  {!isQuestionLocked && (
                     <div className="mt-3 flex items-center justify-start">
                       <button
                         type="button"
@@ -887,29 +997,56 @@ export default function PracticeView({
                     </div>
                   )}
 
-                  {/* Status badge after submit; unlock full solution only on 3rd submission */}
+                  {/* Per-question Status + 1-time Retry for wrong/blank + Immediate Solution after retry */}
                   {isSubmitted && (
                     <div className="mt-4 pt-3 border-t border-slate-100 space-y-2.5 text-xs">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         {ansRecord?.is_correct ? (
                           <span className="inline-flex items-center gap-1.5 font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
                             <CheckCircle className="w-3.5 h-3.5" />
-                            Đúng (+{ansRecord.score} điểm)
+                            Đúng (+{ansRecord.score} điểm){hasRetriedThis ? ' — Đã hoàn thành lượt làm lại' : ' — Đã khóa'}
+                          </span>
+                        ) : isRetryingThis ? (
+                          <span className="inline-flex items-center gap-1.5 font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full">
+                            ✏️ Đang mở khóa để làm lại câu này (lượt duy nhất)
                           </span>
                         ) : isBlank ? (
                           <span className="inline-flex items-center gap-1.5 font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
                             <AlertCircle className="w-3.5 h-3.5" />
-                            Bỏ trống (-{UNANSWERED_PENALTY} điểm){submitCount < 3 ? ' — Hãy thử làm lại nhé!' : ''}
+                            Bỏ trống (-{UNANSWERED_PENALTY} điểm)
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 font-bold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full">
                             <AlertCircle className="w-3.5 h-3.5" />
-                            Chưa chính xác (0 điểm){submitCount < 3 ? ' — Hãy suy nghĩ và thử lại nhé!' : ''}
+                            Chưa chính xác (0 điểm)
                           </span>
+                        )}
+
+                        {/* 1-time retry action for wrong or blank questions */}
+                        {!ansRecord?.is_correct && !hasRetriedThis && (
+                          isRetryingThis ? (
+                            <button
+                              type="button"
+                              onClick={() => handleCheckSingleRetry(q)}
+                              className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                              Kiểm tra lại câu này
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleStartSingleRetry(q.id)}
+                              className="px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              Làm lại câu này (còn 1 lượt)
+                            </button>
+                          )
                         )}
                       </div>
 
-                      {submitCount >= 3 && (
+                      {showQuestionSolution && (
                         <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-1 text-slate-700">
                           <p className="font-bold text-emerald-800">
                             ✅ Đáp án chuẩn: {q.correct_answer}
@@ -943,17 +1080,13 @@ export default function PracticeView({
             })}
           </div>
 
-          {/* Bottom Action: Submit / Retry / Switch Exam */}
+          {/* Bottom Action: Submit or Switch Exam */}
           <div className="sticky bottom-4 z-20 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200 shadow-xl flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-600 font-semibold">
                 {!isSubmitted
-                  ? `Lần nộp ${submitCount + 1}/3 — Đã làm xong? Hãy nộp bài nhé!`
-                  : submitCount === 1
-                  ? 'Bạn còn 2 lượt làm lại để sửa câu sai hoặc bổ sung câu bỏ trống.'
-                  : submitCount === 2
-                  ? 'Bạn còn 1 lượt làm lại cuối cùng trước khi hệ thống mở đáp án.'
-                  : 'Đã hoàn thành tối đa 3 lần nộp và mở khóa toàn bộ lời giải!'}
+                  ? 'Đã làm xong? Hãy bấm Nộp Bài & Chấm Điểm nhé!'
+                  : 'Bài đã chấm! Em có thể sửa từng câu sai/bỏ trống (1 lượt/câu) hoặc chuyển sang đề mới.'}
               </span>
             </div>
 
@@ -964,14 +1097,6 @@ export default function PracticeView({
               >
                 <Send className="w-4 h-4" />
                 Nộp Bài & Chấm Điểm
-              </button>
-            ) : submitCount < 3 ? (
-              <button
-                onClick={handleRetryQuiz}
-                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-sm shadow-md shadow-purple-200 flex items-center gap-2 transition transform active:scale-95"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Làm lại bài (Còn {3 - submitCount} lượt)
               </button>
             ) : (
               <button
