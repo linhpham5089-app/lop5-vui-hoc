@@ -563,5 +563,16 @@ export const VIETNAMESE_SEED_QUESTIONS: Question[] = [
     grammar_clue: 'Nếu [điều kiện] thì [kết quả].',
     encouragement: 'Đặt câu rất chuẩn và ý nghĩa! ✍️🌟',
     points: 2.0
+  },
+  {
+    id: "hcm2020_q3",
+    subject: "Tiếng Việt",
+    topic: "Bài thi chuẩn của Hồ Chí Minh",
+    type: "essay",
+    question: "(6 points) Each item below is tagged with a number (from 1 to 20). Classify them into types \nof rubbish by writing the corresponding numbers in the appropriate boxes with the rubbish bins below. \n0.3 một",
+    guide: "Vận dụng kiến thức trọng tâm Lớp 5 để giải quyết tình huống thực tế.",
+    correct_answer: "đúng \n 20 đáp án đúng : 6 điểm. \n HỌ VÀ TÊN HỌC SINH: …………………..…… KỲ KHẢO SÁT TUYỂN SINH SỐ CỦA MỖI BÀI \n …………………………………………………… LỚP 6 THPT TRẦN ĐẠI NGHĨA từ 1 đến cuối \n NGÀY SINH: …………………………………… NĂM HỌC 2020 - 2021 do Giám thị ghi \n NƠI SINH: ………………………………………. Hội đồng khảo sát: ……………… \n HỌC SINH TRƯỜNG: ………………………….. Phòng số: ………………….……. \n SỐ BÁO DANH Họ, tên và chữ ký SỐ PHÁCH \n BÀI KHẢO SÁT: do ",
+    explanation: "đúng \n 20 đáp án đúng : 6 điểm. \n HỌ VÀ TÊN HỌC SINH: …………………..…… KỲ KHẢO SÁT TUYỂN SINH SỐ CỦA MỖI BÀI \n …………………………………………………… LỚP 6 THPT TRẦN ĐẠI NGHĨA từ 1 đến cuối \n NGÀY SINH: …………………………………… NĂM HỌC 2020 - 2021 do Giám thị ghi \n NƠI SINH: ………………………………………. Hội đồng khảo sát: ……………… \n HỌC SINH TRƯỜNG: ………………………….. Phòng số: ………………….……. \n SỐ BÁO DANH Họ, tên và chữ ký SỐ PHÁCH \n BÀI KHẢO SÁT: do ",
+    points: 2.0
   }
 ];

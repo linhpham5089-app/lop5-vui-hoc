@@ -283,5 +283,82 @@ export const MATH_SEED_QUESTIONS: Question[] = [
     correct_answer: 'Bán kính r = 31,4 : 3,14 : 2 = 5 cm. Diện tích = 5 × 5 × 3,14 = 78,5 cm².',
     explanation: 'r = 31,4 : 3,14 : 2 = 5 (cm). Diện tích = 5 × 5 × 3,14 = 78,5 (cm²).',
     points: 2.0
+  },
+  {
+    id: "tdn2023_toan_1",
+    subject: "Toán",
+    topic: "Bài thi chuẩn của Trần Đại Nghĩa",
+    type: "essay",
+    question: "Điền số thích hợp vào chỗ trống. \nCó ____________ số tự nhiên mà khi chia 86 cho các số đó đều có dư là 5.",
+    guide: "Đọc kỹ đề bài, phân tích dữ kiện và trình bày các bước giải rõ ràng.",
+    correct_answer: "Có 3 số tự nhiên mà khi chia 86 cho các số đó đều có dư là 5.",
+    explanation: "Có 3 số tự nhiên mà khi chia 86 cho các số đó đều có dư là 5.",
+    points: 2.0
+  },
+  {
+    id: "tdn2023_toan_2",
+    subject: "Toán",
+    topic: "Bài thi chuẩn của Trần Đại Nghĩa",
+    type: "essay",
+    question: "Điền số thích hợp vào chỗ trống. \nAn và Bình cùng tham gia đua xe đạp. Các vận động viên xuất phát cùng một lúc tại điểm xuất \nphát và về đích tại các thời điểm khác nhau. An về ngay sau Bình và xếp ở vị trí thứ 15, Bình xếp thứ tư \ntính từ dưới lên. Vậy có tất cả ____________ vận động viên tham gia cuộc đua.",
+    guide: "Đọc kỹ đề bài, phân tích dữ kiện và trình bày các bước giải rõ ràng.",
+    correct_answer: "An và Bình cùng tham gia đua xe đạp. Các vận động viên xuất phát cùng một lúc tại điểm xuất \nphát và về đích tại các thời điểm khác nhau. An về ngay sau Bình và xếp ở vị trí thứ 15, Bình xếp thứ \ntư tính từ dưới lên. Vậy có tất cả 17 vận động viên tham gia cuộc đua.",
+    explanation: "An và Bình cùng tham gia đua xe đạp. Các vận động viên xuất phát cùng một lúc tại điểm xuất \nphát và về đích tại các thời điểm khác nhau. An về ngay sau Bình và xếp ở vị trí thứ 15, Bình xếp thứ \ntư tính từ dưới lên. Vậy có tất cả 17 vận động viên tham gia cuộc đua.",
+    points: 2.0
+  },
+  {
+    id: "tdn2023_toan_4",
+    subject: "Toán",
+    topic: "Bài thi chuẩn của Trần Đại Nghĩa",
+    type: "essay",
+    question: "Một mảnh đất hình chữ nhật có chiều dài gấp ba lần chiều rộng. Nếu tăng chiều dài thêm 1 m và \ntăng chiều rộng thêm 1 m thì được mảnh đất hình chữ nhật mới có diện tích hơn diện tích mảnh đất \nlúc đầu là 17 m2. \na) Vẽ một hình biểu diễn mảnh đất lúc đầu và lúc sau. \nb) Tính diện tích của mảnh đất lúc đầu. \nThí sinh trình bày đầy đủ các bước giải của Bài 4 vào mặt sau. \nĐỀ CHÍNH THỨC \n2 \n \n \n \n \n \n \n \n \n \n \n \n………………………………………………………………………………………………………………….. \n………………………………………………………………………………………………………………….. \n………………………………………………………………………………………………………………….. \n………………………………………………………………………………………………………………….. \n………………………………………………………………………………………………………………….. \n………………………………………………………………………………………………………………….. \n………………………………………………………………………………………………………………….. \n………………………………………………………………………………………………………………….. \n………………………………………………………………………………………………………………….. \n………………………………………………………………………………………………………………….. \n………………………………………………",
+    guide: "Đọc kỹ đề bài, phân tích dữ kiện và trình bày các bước giải rõ ràng.",
+    correct_answer: "Một mảnh đất hình chữ nhật có chiều dài gấp ba lần chiều rộng. Nếu tăng chiều dài thêm 1 m và \ntăng chiều rộng thêm 1 m thì được mảnh đất hình chữ nhật mới có diện tích hơn diện tích mảnh đất \nlúc đầu là 17 m2. \na) Vẽ một hình biểu diễn mảnh đất lúc đầu và lúc sau. \nb) Tính diện tích của mảnh đất lúc đầu. \n \n \n \nLời giải. \na) (2 điểm) \n \n \n \n \n \n \n",
+    explanation: "Một mảnh đất hình chữ nhật có chiều dài gấp ba lần chiều rộng. Nếu tăng chiều dài thêm 1 m và \ntăng chiều rộng thêm 1 m thì được mảnh đất hình chữ nhật mới có diện tích hơn diện tích mảnh đất \nlúc đầu là 17 m2. \na) Vẽ một hình biểu diễn mảnh đất lúc đầu và lúc sau. \nb) Tính diện tích của mảnh đất lúc đầu. \n \n \n \nLời giải. \na) (2 điểm) \n \n \n \n \n \n \n \n \n \n \n \n \n \nHình vẽ, trong đó: \n- Vẽ được mảnh đất lúc đầu, lúc sau. (1 điểm) \n- Thể hiện được 4 h",
+    points: 2.0
+  },
+  {
+    id: "tdn2022_toan_1",
+    subject: "Toán",
+    topic: "Bài thi chuẩn của Trần Đại Nghĩa",
+    type: "essay",
+    question: "Trong cách ghi ngày 13/01/2022 thì tổng của năm chữ số đầu và tổng năm chữ số cuối \nbằng nhau. Hỏi ngày cuối cùng trong năm 2022 có cùng tính chất như vậy là ngày nào? \nNgày đó là: ………………………",
+    guide: "Đọc kỹ đề bài, phân tích dữ kiện và trình bày các bước giải rõ ràng.",
+    correct_answer: "Trong cách ghi ngày 13/01/2022 thì tổng của năm chữ số đầu và tổng năm chữ số cuối \nbằng nhau. Hỏi ngày cuối cùng trong năm 2022 có cùng tính chất như vậy là ngày nào? \nNgày đó là: 30/12/2022 (2đ)",
+    explanation: "Trong cách ghi ngày 13/01/2022 thì tổng của năm chữ số đầu và tổng năm chữ số cuối \nbằng nhau. Hỏi ngày cuối cùng trong năm 2022 có cùng tính chất như vậy là ngày nào? \nNgày đó là: 30/12/2022 (2đ)",
+    points: 2.0
+  },
+  {
+    id: "tdn2022_toan_2",
+    subject: "Toán",
+    topic: "Bài thi chuẩn của Trần Đại Nghĩa",
+    type: "essay",
+    question: "Cho A = 1 + 3 + 5 + … + 2021 + 2023 và B = 2 + 4 + 6 + … + 2020 + 2022. Tính A – B. \nKết quả: A – B = …………………",
+    guide: "Đọc kỹ đề bài, phân tích dữ kiện và trình bày các bước giải rõ ràng.",
+    correct_answer: "Cho A = 1 + 3 + 5 + … + 2021 + 2023 và B = 2 + 4 + 6 + … + 2020 + 2022. Tính A – B. \nKết quả: A – B = 1012 (2đ)",
+    explanation: "Cho A = 1 + 3 + 5 + … + 2021 + 2023 và B = 2 + 4 + 6 + … + 2020 + 2022. Tính A – B. \nKết quả: A – B = 1012 (2đ)",
+    points: 2.0
+  },
+  {
+    id: "tdn2022_toan_3",
+    subject: "Toán",
+    topic: "Bài thi chuẩn của Trần Đại Nghĩa",
+    type: "essay",
+    question: "Từ 400 đến 900, có bao nhiêu số tự nhiên mà tổng các chữ số của số đó bằng 10? \nKết quả là: ………………… số",
+    guide: "Đọc kỹ đề bài, phân tích dữ kiện và trình bày các bước giải rõ ràng.",
+    correct_answer: "Từ 400 đến 900, có bao nhiêu số tự nhiên mà tổng các chữ số của số đó bằng 10? \nKết quả là: 25 (số) (2đ)",
+    explanation: "Từ 400 đến 900, có bao nhiêu số tự nhiên mà tổng các chữ số của số đó bằng 10? \nKết quả là: 25 (số) (2đ)",
+    points: 2.0
+  },
+  {
+    id: "tdn2022_toan_4",
+    subject: "Toán",
+    topic: "Bài thi chuẩn của Trần Đại Nghĩa",
+    type: "essay",
+    question: "Một xe máy đi từ A lúc 6 giờ 47 phút với vận tốc 36 km/giờ. Đến 7 giờ 2 phút, một ô tô \ncũng đi từ A đuổi theo xe máy với vận tốc 54 km/giờ. \na. Hỏi ô tô đuổi kịp xe máy lúc mấy giờ? \nb. Sau khi hai xe gặp nhau tại C, xe máy quay về A, còn ô tô tiếp tục đi thêm một quãng đường \nnữa đến D rồi mới quay về A. Hỏi quãng đường CD dài bao nhiêu ki-lô-mét, biết rằng ô tô về \nđến A cùng lúc với xe máy? \n \n \n \n \n(Thí sinh trình bày đầy đủ các bước giải của Bài 4 vào mặt sau) \n \n \nĐỀ CHÍNH THỨC \nA \n C \n D \n\n2 \n \n \n \n \n \n \n………………………………………………………………………………………………………………..… \n………………………………………………………………………………………………………………..… \n………………………………………………………………………………………………………………..… \n………………………………………………………………………………………………………………..… \n………………………………………………………………………………………………………………..… \n………………………………………………………………………………………………………………..… \n………………………………………………………………………………………………………………..… \n……………………………………………………………………………",
+    guide: "Đọc kỹ đề bài, phân tích dữ kiện và trình bày các bước giải rõ ràng.",
+    correct_answer: "Một xe máy đi từ A lúc 6 giờ 47 phút với vận tốc 36 km/giờ. Đến 7 giờ 2 phút, một ô tô \ncũng đi từ A đuổi theo xe máy với vận tốc 54 km/giờ. \na. Hỏi ô tô đuổi kịp xe máy lúc mấy giờ? \nb. Sau khi hai xe gặp nhau tại C, xe máy quay về A, còn ô tô tiếp tục đi thêm một quãng \nđường nữa đến D rồi mới quay về A. Hỏi quãng đươ",
+    explanation: "Một xe máy đi từ A lúc 6 giờ 47 phút với vận tốc 36 km/giờ. Đến 7 giờ 2 phút, một ô tô \ncũng đi từ A đuổi theo xe máy với vận tốc 54 km/giờ. \na. Hỏi ô tô đuổi kịp xe máy lúc mấy giờ? \nb. Sau khi hai xe gặp nhau tại C, xe máy quay về A, còn ô tô tiếp tục đi thêm một quãng \nđường nữa đến D rồi mới quay về A. Hỏi quãng đường CD dài bao nhiêu ki-lô-mét, biết rằng \nô tô về đến A cùng lúc với xe máy? \n \n \n \n \nGiải. \na. 7",
+    points: 2.0
   }
 ];

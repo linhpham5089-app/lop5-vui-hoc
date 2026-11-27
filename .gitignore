@@ -30,3 +30,6 @@ audio_cache/*.mp3
 # OS files
 .DS_Store
 Thumbs.db
+
+# Temporary downloaded exam PDFs
+scripts/temp_pdfs/
