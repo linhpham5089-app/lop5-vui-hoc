@@ -25,11 +25,14 @@ export async function GET(req: NextRequest) {
   const ip = extractClientIp(req);
   const deviceId = req.nextUrl.searchParams.get('deviceId');
   const profileCode = buildProfileCode(ip, deviceId);
+  const detectedAt = new Date().toISOString();
+
+  console.log(`[IDENTIFY] time=${detectedAt} ip=${ip} profile=${profileCode}`);
 
   return NextResponse.json({
     ip,
     profileCode,
-    detectedAt: new Date().toISOString(),
+    detectedAt,
   });
 }
 
@@ -44,9 +47,13 @@ export async function POST(req: NextRequest) {
   }
 
   const profileCode = buildProfileCode(ip, deviceId);
+  const detectedAt = new Date().toISOString();
+
+  console.log(`[IDENTIFY] time=${detectedAt} ip=${ip} profile=${profileCode}`);
+
   return NextResponse.json({
     ip,
     profileCode,
-    detectedAt: new Date().toISOString(),
+    detectedAt,
   });
 }
