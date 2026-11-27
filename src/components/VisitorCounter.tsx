@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getOrCreateDeviceId, getSavedProfile } from '@/lib/storage';
 
 interface AnalyticsStats {
-  totalDevices: number;
-  activeToday: number;
-  totalPageViews: number;
+  uniqueIps: number;
+  todayIps: number;
+  totalVisits: number;
 }
 
 const SESSION_FLAG = 'lop5_analytics_counted';
@@ -24,16 +23,7 @@ export default function VisitorCounter() {
           sessionStorage.getItem(SESSION_FLAG) === '1';
 
         if (!alreadyCounted) {
-          const deviceId = getOrCreateDeviceId();
-          const profile = getSavedProfile();
-          const res = await fetch('/api/analytics', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              deviceId,
-              profileCode: profile.profileCode,
-            }),
-          });
+          const res = await fetch('/api/analytics', { method: 'POST' });
           if (res.ok) {
             const data = await res.json();
             if (typeof sessionStorage !== 'undefined') {
@@ -41,9 +31,9 @@ export default function VisitorCounter() {
             }
             if (isMounted) {
               setStats({
-                totalDevices: data.totalDevices ?? 1,
-                activeToday: data.activeToday ?? 1,
-                totalPageViews: data.totalPageViews ?? 1,
+                uniqueIps: data.uniqueIps ?? 1,
+                todayIps: data.todayIps ?? 1,
+                totalVisits: data.totalVisits ?? 1,
               });
             }
             return;
@@ -55,9 +45,9 @@ export default function VisitorCounter() {
           const data = await res.json();
           if (isMounted) {
             setStats({
-              totalDevices: data.totalDevices ?? 0,
-              activeToday: data.activeToday ?? 0,
-              totalPageViews: data.totalPageViews ?? 0,
+              uniqueIps: data.uniqueIps ?? 0,
+              todayIps: data.todayIps ?? 0,
+              totalVisits: data.totalVisits ?? 0,
             });
           }
         }
@@ -74,35 +64,35 @@ export default function VisitorCounter() {
 
   return (
     <div className="inline-flex flex-wrap items-center gap-3 bg-white border border-slate-200/90 shadow-sm rounded-full px-3.5 py-1.5 text-xs">
-      <span className="inline-flex items-center gap-1 text-slate-700 font-semibold" title="Tổng số máy đã học">
-        <span>🖥️</span>
-        <span className="hidden sm:inline text-slate-500">Tổng máy:</span>
+      <span className="inline-flex items-center gap-1 text-slate-700 font-semibold" title="Số địa chỉ IP khác nhau đã truy cập">
+        <span>🌐</span>
+        <span className="hidden sm:inline text-slate-500">Số IP khác nhau:</span>
         <span className="font-extrabold text-indigo-700">
-          {stats ? stats.totalDevices.toLocaleString('vi-VN') : '…'}
+          {stats ? stats.uniqueIps.toLocaleString('vi-VN') : '…'}
         </span>
-        <span className="hidden md:inline text-slate-500">máy</span>
+        <span className="text-slate-500">IP</span>
       </span>
 
       <span className="text-slate-300">|</span>
 
-      <span className="inline-flex items-center gap-1 text-slate-700 font-semibold" title="Số máy học hôm nay">
+      <span className="inline-flex items-center gap-1 text-slate-700 font-semibold" title="Số địa chỉ IP truy cập hôm nay">
         <span>🟢</span>
-        <span className="hidden sm:inline text-slate-500">Hôm nay:</span>
+        <span className="hidden sm:inline text-slate-500">IP hôm nay:</span>
         <span className="font-extrabold text-emerald-700">
-          {stats ? stats.activeToday.toLocaleString('vi-VN') : '…'}
+          {stats ? stats.todayIps.toLocaleString('vi-VN') : '…'}
         </span>
-        <span className="hidden md:inline text-slate-500">máy</span>
+        <span className="text-slate-500">IP</span>
       </span>
 
       <span className="text-slate-300">|</span>
 
       <span className="inline-flex items-center gap-1 text-slate-700 font-semibold" title="Tổng lượt truy cập">
         <span>👀</span>
-        <span className="hidden sm:inline text-slate-500">Lượt xem:</span>
+        <span className="hidden sm:inline text-slate-500">Tổng lượt truy cập:</span>
         <span className="font-extrabold text-purple-700">
-          {stats ? stats.totalPageViews.toLocaleString('vi-VN') : '…'}
+          {stats ? stats.totalVisits.toLocaleString('vi-VN') : '…'}
         </span>
-        <span className="hidden md:inline text-slate-500">lượt</span>
+        <span className="text-slate-500">lượt</span>
       </span>
     </div>
   );

@@ -3,11 +3,11 @@ import { getRedisClient } from '@/lib/redis';
 
 export const maxDuration = 15;
 
-// In-memory fallback when Upstash Redis is not configured (e.g. local dev)
+// In-memory fallback when Upstash Redis is not configured
 const memoryFallback = {
-  pageViews: 0,
-  uniqueDevices: new Set<string>(),
-  activeByDate: new Map<string, Set<string>>(),
+  totalVisits: 0,
+  uniqueIps: new Set<string>(),
+  activeIpsByDate: new Map<string, Set<string>>(),
 };
 
 function getVietnamDateKey(): string {
@@ -22,31 +22,33 @@ function getVietnamDateKey(): string {
 function extractClientIp(req: NextRequest): string {
   const forwarded = req.headers.get('x-forwarded-for');
   const realIp = req.headers.get('x-real-ip');
-  let raw = forwarded ? forwarded.split(',')[0].trim() : (realIp || '127.0.0.1');
-  if (raw === '::1' || raw === '::ffff:127.0.0.1') {
-    raw = '127.0.0.1';
-  } else if (raw.startsWith('::ffff:')) {
+  let raw = forwarded ? forwarded.split(',')[0].trim() : (realIp ? realIp.trim() : '');
+
+  if (!raw || raw === '::1' || raw === '127.0.0.1' || raw === '::ffff:127.0.0.1') {
+    return 'unknown';
+  }
+  if (raw.startsWith('::ffff:')) {
     raw = raw.replace('::ffff:', '');
   }
-  return raw || '127.0.0.1';
+  return raw || 'unknown';
 }
 
 export async function GET() {
   const todayVN = getVietnamDateKey();
-  const todayKey = `stats:active_today:${todayVN}`;
+  const todayKey = `stats:active_ips:${todayVN}`;
   const redis = getRedisClient();
 
   if (redis) {
     try {
-      const [totalDevices, activeToday, totalPageViews] = await Promise.all([
-        redis.scard('stats:unique_devices'),
+      const [uniqueIps, todayIps, totalVisits] = await Promise.all([
+        redis.scard('stats:unique_ips'),
         redis.scard(todayKey),
-        redis.get<number>('stats:page_views'),
+        redis.get<number>('stats:total_visits'),
       ]);
       return NextResponse.json({
-        totalDevices: Number(totalDevices) || 0,
-        activeToday: Number(activeToday) || 0,
-        totalPageViews: Number(totalPageViews) || 0,
+        uniqueIps: Number(uniqueIps) || 0,
+        todayIps: Number(todayIps) || 0,
+        totalVisits: Number(totalVisits) || 0,
         date: todayVN,
         source: 'redis',
       });
@@ -56,9 +58,9 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    totalDevices: memoryFallback.uniqueDevices.size,
-    activeToday: memoryFallback.activeByDate.get(todayVN)?.size || 0,
-    totalPageViews: memoryFallback.pageViews,
+    uniqueIps: memoryFallback.uniqueIps.size,
+    todayIps: memoryFallback.activeIpsByDate.get(todayVN)?.size || 0,
+    totalVisits: memoryFallback.totalVisits,
     date: todayVN,
     source: 'memory',
   });
@@ -66,40 +68,28 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const todayVN = getVietnamDateKey();
-  const todayKey = `stats:active_today:${todayVN}`;
-  const ip = extractClientIp(req);
-
-  let deviceId = '';
-  let profileCode = '';
-  try {
-    const body = await req.json();
-    deviceId = String(body?.deviceId || '').trim();
-    profileCode = String(body?.profileCode || '').trim();
-  } catch {
-    // Ignore empty body
-  }
-
-  const uniqueMember = profileCode || `${ip}-${deviceId || 'anon'}`;
+  const todayKey = `stats:active_ips:${todayVN}`;
+  const clientIp = extractClientIp(req);
   const redis = getRedisClient();
 
   if (redis) {
     try {
-      const [totalPageViews] = await Promise.all([
-        redis.incr('stats:page_views'),
-        redis.sadd('stats:unique_devices', uniqueMember),
-        redis.sadd(todayKey, uniqueMember),
+      const [totalVisits] = await Promise.all([
+        redis.incr('stats:total_visits'),
+        redis.sadd('stats:unique_ips', clientIp),
+        redis.sadd(todayKey, clientIp),
       ]);
       await redis.expire(todayKey, 48 * 3600);
 
-      const [totalDevices, activeToday] = await Promise.all([
-        redis.scard('stats:unique_devices'),
+      const [uniqueIps, todayIps] = await Promise.all([
+        redis.scard('stats:unique_ips'),
         redis.scard(todayKey),
       ]);
 
       return NextResponse.json({
-        totalDevices: Number(totalDevices) || 1,
-        activeToday: Number(activeToday) || 1,
-        totalPageViews: Number(totalPageViews) || 1,
+        uniqueIps: Number(uniqueIps) || 1,
+        todayIps: Number(todayIps) || 1,
+        totalVisits: Number(totalVisits) || 1,
         date: todayVN,
         source: 'redis',
       });
@@ -108,17 +98,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  memoryFallback.pageViews += 1;
-  memoryFallback.uniqueDevices.add(uniqueMember);
-  if (!memoryFallback.activeByDate.has(todayVN)) {
-    memoryFallback.activeByDate.set(todayVN, new Set());
+  memoryFallback.totalVisits += 1;
+  memoryFallback.uniqueIps.add(clientIp);
+  if (!memoryFallback.activeIpsByDate.has(todayVN)) {
+    memoryFallback.activeIpsByDate.set(todayVN, new Set());
   }
-  memoryFallback.activeByDate.get(todayVN)!.add(uniqueMember);
+  memoryFallback.activeIpsByDate.get(todayVN)!.add(clientIp);
 
   return NextResponse.json({
-    totalDevices: memoryFallback.uniqueDevices.size,
-    activeToday: memoryFallback.activeByDate.get(todayVN)!.size,
-    totalPageViews: memoryFallback.pageViews,
+    uniqueIps: memoryFallback.uniqueIps.size,
+    todayIps: memoryFallback.activeIpsByDate.get(todayVN)!.size,
+    totalVisits: memoryFallback.totalVisits,
     date: todayVN,
     source: 'memory',
   });
