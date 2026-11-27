@@ -87,6 +87,7 @@ export interface Riddle {
   question: string;
   hint: string;
   answer: string;
+  keywords?: string[];
   explanation: string;
   is_solved?: boolean;
 }

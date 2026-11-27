@@ -193,7 +193,17 @@ export function getSavedRiddles(): Riddle[] {
   if (typeof window === 'undefined') return SEED_RIDDLES;
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.RIDDLES);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const saved: Riddle[] = JSON.parse(raw);
+      const existingIds = new Set(saved.map(r => r.id));
+      const missingSeeds = SEED_RIDDLES.filter(s => !existingIds.has(s.id));
+      if (missingSeeds.length > 0) {
+        const merged = [...saved, ...missingSeeds];
+        saveRiddles(merged);
+        return merged;
+      }
+      return saved;
+    }
   } catch (e) {}
   return SEED_RIDDLES;
 }

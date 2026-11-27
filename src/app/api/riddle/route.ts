@@ -8,21 +8,23 @@ export async function POST(req: NextRequest) {
     const { action, question, correctAnswer, userAnswer, category } = await req.json();
 
     if (action === 'generate') {
+      const chosenCat = category || 'Đố mẹo';
       const systemPrompt = `
 Bạn là "Vua Đố Vui Trí Tuệ" dành cho thiếu nhi và học sinh Lớp 5.
-Hãy sáng tác 1 câu đố mới toanh, thông minh, hài hước, kích thích tư duy.
-Có thể thuộc các thể loại: Đố mẹo, Đố chữ, Toán logic, Khoa học vui hoặc Đố vui Tiếng Anh.
+Hãy sáng tác 1 câu đố mới toanh, thông minh, chính xác, kích thích tư duy thuộc ĐÚNG chủ đề được yêu cầu: "${chosenCat}".
+Các chủ đề hỗ trợ gồm: Địa lý Việt Nam, Lịch sử Việt Nam, Đố mẹo, Đố chữ, Toán logic, Khoa học vui hoặc Đố vui Tiếng Anh.
 
 TRẢ VỀ ĐÚNG ĐỊNH DẠNG JSON:
 {
-  "category": "${category || 'Đố mẹo'}",
-  "question": "Nội dung câu đố dí dỏm...",
+  "category": "${chosenCat}",
+  "question": "Nội dung câu đố dí dỏm, rõ ràng...",
   "hint": "Gợi ý nhỏ cho bé nếu bí...",
   "answer": "Đáp án chuẩn...",
-  "explanation": "Giải thích hài hước, bất ngờ kèm emoji sinh động..."
+  "keywords": ["từ khóa 1", "từ khóa 2"],
+  "explanation": "Giải thích súc tích, thú vị kèm emoji sinh động..."
 }
 `;
-      const raw = await callGemini('Hãy sáng tác một câu đố vui mới lạ và hấp dẫn!', systemPrompt);
+      const raw = await callGemini(`Hãy sáng tác một câu đố vui mới lạ và hấp dẫn thuộc chủ đề "${chosenCat}"!`, systemPrompt);
 
       let cleanJson = raw.trim();
       if (cleanJson.includes('```json')) {

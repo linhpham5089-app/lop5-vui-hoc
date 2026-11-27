@@ -33,7 +33,16 @@ export default function RiddlesView({ onRewardStars }: RiddlesViewProps) {
     setRiddles(getSavedRiddles());
   }, []);
 
-  const categories = ['Tất cả', 'Đố mẹo', 'Đố chữ', 'Toán logic', 'Khoa học vui', 'Đố vui Tiếng Anh'];
+  const categories = [
+    'Tất cả',
+    'Địa lý Việt Nam',
+    'Lịch sử Việt Nam',
+    'Đố mẹo',
+    'Đố chữ',
+    'Toán logic',
+    'Khoa học vui',
+    'Đố vui Tiếng Anh'
+  ];
 
   const filteredRiddles = activeCategory === 'Tất cả'
     ? riddles
@@ -91,8 +100,12 @@ export default function RiddlesView({ onRewardStars }: RiddlesViewProps) {
       }
     } catch (e) {
       console.error(e);
-      // Fallback local check
-      const isMatch = r.answer.toLowerCase().includes(input.toLowerCase()) || input.toLowerCase().includes(r.answer.toLowerCase());
+      // Fallback local check (supports flexible keywords)
+      const normInput = input.toLowerCase();
+      const isMatch =
+        r.answer.toLowerCase().includes(normInput) ||
+        normInput.includes(r.answer.toLowerCase()) ||
+        (Array.isArray(r.keywords) && r.keywords.some(kw => normInput.includes(kw.toLowerCase()) || kw.toLowerCase().includes(normInput)));
       setCheckResults(prev => ({
         ...prev,
         [r.id]: {
