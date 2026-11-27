@@ -52,6 +52,7 @@ export default function PracticeView({
 }: PracticeViewProps) {
   const [selectedSubject, setSelectedSubject] = useState<SubjectKey>(initialSubject);
   const [selectedTopic, setSelectedTopic] = useState<string>(SUBJECTS[initialSubject].topics[0]);
+  const [customTopic, setCustomTopic] = useState<string>('');
   const [currentSession, setCurrentSession] = useState<QuizSession | null>(null);
   const [userAnswers, setUserAnswers] = useState<Record<string | number, string>>({});
   const [showPinyin, setShowPinyin] = useState<boolean>(true);
@@ -71,25 +72,14 @@ export default function PracticeView({
     setSelectedTopic(SUBJECTS[selectedSubject].topics[0]);
   }, [selectedSubject]);
 
-  // Load or generate questions for the topic
-  const startQuiz = async () => {
-    setIsSubmitted(false);
-    setRetryingQuestions({});
-    setRetriedQuestions({});
-    setUserAnswers({});
-    setAiFeedbacks({});
-    setAiHints({});
-    setSummaryStats(null);
-    setAiHints({});
-    setSummaryStats(null);
-
-    let questions: Question[] = [];
-
-    // Route questions by subject & topic
+  // Resolve matching seed questions for the active subject & topic
+  const getMatchingSeedPool = (): Question[] => {
     const isStandardExamTopic =
       selectedTopic === 'Bài thi chuẩn của Hồ Chí Minh' ||
       selectedTopic === 'Bài thi chuẩn của Trần Đại Nghĩa' ||
       selectedTopic === 'Bài thi tổng hợp';
+
+    let questions: Question[] = [];
 
     if (isStandardExamTopic) {
       const subjectPool =
@@ -104,17 +94,16 @@ export default function PracticeView({
     } else if (selectedTopic.includes('4 Kỹ Năng')) {
       questions = FOUR_SKILLS_QUESTIONS.filter(q => q.subject === selectedSubject);
     } else if (selectedSubject === 'Toán') {
-      // Filter by topic keyword matching
       const topicLower = selectedTopic.toLowerCase();
       const topicFiltered = MATH_SEED_QUESTIONS.filter(q => {
         const qTopicLower = q.topic.toLowerCase();
-        if (topicLower.includes('phân số'))    return qTopicLower.includes('phân số');
-        if (topicLower.includes('thập phân'))  return qTopicLower.includes('thập phân');
-        if (topicLower.includes('phần trăm'))  return qTopicLower.includes('phần trăm');
-        if (topicLower.includes('hình học'))   return qTopicLower.includes('hình học');
+        if (topicLower.includes('phân số')) return qTopicLower.includes('phân số');
+        if (topicLower.includes('thập phân')) return qTopicLower.includes('thập phân');
+        if (topicLower.includes('phần trăm')) return qTopicLower.includes('phần trăm');
+        if (topicLower.includes('hình học')) return qTopicLower.includes('hình học');
         if (topicLower.includes('chuyển động')) return qTopicLower.includes('chuyển động');
-        if (topicLower.includes('tỉ số'))      return qTopicLower.includes('tỉ số');
-        return true; // "Đề kiểm tra chuẩn" or unrecognised → all questions
+        if (topicLower.includes('tỉ số')) return qTopicLower.includes('tỉ số');
+        return true;
       });
       questions = topicFiltered.length >= 3 ? topicFiltered : MATH_SEED_QUESTIONS;
     } else if (selectedSubject === 'Tiếng Anh') {
@@ -125,22 +114,39 @@ export default function PracticeView({
         questions = FOUR_SKILLS_QUESTIONS.filter(q => q.subject === 'Tiếng Anh');
       }
     } else if (selectedSubject === 'Tiếng Việt') {
-      // Try to narrow down by sub-topic keyword, then fall back to all Vietnamese Qs
       const topicKeyword = selectedTopic.split(':').pop()?.trim().toLowerCase() ?? '';
       const filtered = VIETNAMESE_SEED_QUESTIONS.filter(q =>
-        topicKeyword.length > 2
-          ? q.topic.toLowerCase().includes(topicKeyword)
-          : true
+        topicKeyword.length > 2 ? q.topic.toLowerCase().includes(topicKeyword) : true
       );
       questions = filtered.length > 0 ? filtered : VIETNAMESE_SEED_QUESTIONS;
     } else if (selectedSubject === 'Tiếng Trung') {
-      questions = FOUR_SKILLS_QUESTIONS.filter(q => q.subject === 'Tiếng Trung');
+      const topicKeyword = selectedTopic.split('(')[0].trim().toLowerCase();
+      const filtered = FOUR_SKILLS_QUESTIONS.filter(
+        q => q.subject === 'Tiếng Trung' && q.topic.toLowerCase().includes(topicKeyword.slice(0, 12))
+      );
+      questions = filtered.length >= 3 ? filtered : FOUR_SKILLS_QUESTIONS.filter(q => q.subject === 'Tiếng Trung');
     }
 
-    // Final safe fallback — always Vietnamese, never empty English dump
     if (questions.length === 0) {
       questions = VIETNAMESE_SEED_QUESTIONS;
     }
+    return questions;
+  };
+
+  // Load or generate questions for the topic
+  const startQuiz = async () => {
+    setIsSubmitted(false);
+    setRetryingQuestions({});
+    setRetriedQuestions({});
+    setUserAnswers({});
+    setAiFeedbacks({});
+    setAiHints({});
+    setSummaryStats(null);
+
+    const pool = getMatchingSeedPool();
+    // Shuffle and pick up to 10 questions so each session stays fresh & focused
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    const questions = shuffled.slice(0, Math.min(10, shuffled.length));
 
     const newSession: QuizSession = {
       id: `session_${Date.now()}`,
@@ -156,7 +162,7 @@ export default function PracticeView({
     upsertSession(newSession);
   };
 
-  // Generate fresh exam questions on-demand via Gemini API
+  // Generate fresh exam questions on-demand via Gemini API (with Few-shot seed references & custom topic support)
   const handleGenerateAIExam = async () => {
     if (isGeneratingExam) return;
     setIsGeneratingExam(true);
@@ -168,14 +174,22 @@ export default function PracticeView({
     setAiHints({});
     setSummaryStats(null);
 
+    const targetTopic = customTopic.trim() || selectedTopic;
+    const pool = getMatchingSeedPool();
+    const sampleQuestions = [...pool]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3)
+      .map(q => ({ question: q.question, type: q.type, options: q.options }));
+
     try {
       const res = await fetch('/api/generate-exam', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           subject: selectedSubject,
-          topic: selectedTopic,
-          count: 5
+          topic: targetTopic,
+          count: 5,
+          sampleQuestions
         })
       });
       const contentType = res.headers.get('content-type') || '';
@@ -191,7 +205,7 @@ export default function PracticeView({
         ...q,
         id: `ai_${Date.now()}_${idx}`,
         subject: selectedSubject,
-        topic: selectedTopic,
+        topic: targetTopic,
         points: q.points || 1.0
       }));
 
@@ -199,7 +213,7 @@ export default function PracticeView({
         id: `session_${Date.now()}`,
         created_at: new Date().toISOString(),
         subject: selectedSubject,
-        topic: `${selectedTopic} (AI Tạo Mới)`,
+        topic: `${targetTopic} (AI Tạo Mới)`,
         status: 'in_progress',
         questions: generatedQuestions,
         answers: {}
@@ -676,6 +690,20 @@ export default function PracticeView({
               )}
             </button>
           </div>
+        </div>
+
+        {/* Custom topic input for on-demand AI exam */}
+        <div className="mt-4 pt-3 border-t border-slate-100">
+          <label className="block text-xs font-bold text-slate-500 mb-1.5">
+            ✨ Hoặc tự nhập chủ đề riêng muốn AI tạo đề (tùy chọn):
+          </label>
+          <input
+            type="text"
+            value={customTopic}
+            onChange={(e) => setCustomTopic(e.target.value)}
+            placeholder="VD: Toán chuyển động ngược chiều, Thành ngữ Việt Nam, Từ vựng Tiếng Anh chủ đề Vũ trụ..."
+            className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-slate-50/70 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+          />
         </div>
       </div>
 

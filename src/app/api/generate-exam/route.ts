@@ -57,7 +57,7 @@ function getExamStyleGuidance(subject: string, topic: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { subject, topic, count = 5 } = await req.json();
+    const { subject, topic, count = 5, sampleQuestions } = await req.json();
     const requestedCount = Math.max(1, Number(count) || 5);
     const cacheKey = `${subject}::${topic}`;
 
@@ -94,7 +94,14 @@ TUYỆT ĐỐI KHÔNG VIẾT CHỮ NÀO NGOÀI ĐOẠN JSON. Không kèm markdow
 `;
 
     const styleGuidance = getExamStyleGuidance(subject, topic);
-    const userPrompt = `Hãy tạo một bộ đề gồm ${poolSize} câu hỏi bám sát chuẩn Lớp 5 cho môn "${subject}", chủ đề: "${topic}". ${styleGuidance} Đảm bảo có cả câu trắc nghiệm và câu tự luận thú vị.`;
+    const fewShotSamples = Array.isArray(sampleQuestions) && sampleQuestions.length > 0
+      ? `\n\nĐỀ MẪU THAM CHIẾU (Hãy biên soạn câu hỏi mới có cùng cấu trúc tư duy và độ khó nhưng THAY ĐỔI hoàn toàn bối cảnh, số liệu và mở rộng khía cạnh mới):\n${sampleQuestions
+          .slice(0, 3)
+          .map((q: any, idx: number) => `- Mẫu ${idx + 1} (${q.type || 'mcq'}): ${String(q.question || '').slice(0, 220)}`)
+          .join('\n')}`
+      : '';
+
+    const userPrompt = `Hãy tạo một bộ đề gồm ${poolSize} câu hỏi bám sát chuẩn Lớp 5 cho môn "${subject}", chủ đề: "${topic}". ${styleGuidance}${fewShotSamples}\nĐảm bảo thuần văn bản (không phụ thuộc hình vẽ), có cả câu trắc nghiệm và câu tự luận thú vị.`;
 
     const raw = await callGemini(userPrompt, systemPrompt);
     
