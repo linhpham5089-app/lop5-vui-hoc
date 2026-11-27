@@ -1,6 +1,6 @@
 'use client';
 
-import { QuizSession, UserStats, DailyQuest, Riddle, TutorMessage } from '@/types';
+import { QuizSession, UserStats, DailyQuest, Riddle, TutorMessage, StudentProfile } from '@/types';
 import { INITIAL_DAILY_QUESTS } from '@/data/curriculum';
 import { SEED_RIDDLES } from '@/data/riddles';
 
@@ -11,7 +11,76 @@ const STORAGE_KEYS = {
   QUEST_DATE: 'lop5_quest_date',
   RIDDLES: 'lop5_riddles',
   TUTOR_CHAT: 'lop5_tutor_chat',
+  DEVICE_ID: 'lop5_device_id',
+  PROFILE: 'lop5_student_profile',
 };
+
+export function getOrCreateDeviceId(): string {
+  if (typeof window === 'undefined') return 'server-device';
+  try {
+    const existing = localStorage.getItem(STORAGE_KEYS.DEVICE_ID);
+    if (existing) return existing;
+    const generated =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `dev-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 10)}`;
+    localStorage.setItem(STORAGE_KEYS.DEVICE_ID, generated);
+    return generated;
+  } catch {
+    return 'local-device';
+  }
+}
+
+export function getSavedProfile(): StudentProfile {
+  const deviceId = getOrCreateDeviceId();
+  const defaultProfile: StudentProfile = {
+    profileCode: `HS-127.0.0.1-${deviceId.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || '0000'}`,
+    ip: '127.0.0.1',
+    deviceId,
+    alias: '',
+    parentPin: '1234',
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (typeof window === 'undefined') return defaultProfile;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.PROFILE);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        ...defaultProfile,
+        ...parsed,
+        deviceId: parsed.deviceId || deviceId,
+        parentPin: parsed.parentPin || '1234',
+      };
+    }
+  } catch {}
+  return defaultProfile;
+}
+
+export function saveProfile(profile: StudentProfile) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(
+      STORAGE_KEYS.PROFILE,
+      JSON.stringify({ ...profile, updatedAt: new Date().toISOString() })
+    );
+  } catch {}
+}
+
+export function syncProgressToServer(customProfile?: StudentProfile) {
+  if (typeof window === 'undefined') return;
+  try {
+    const profile = customProfile || getSavedProfile();
+    const sessions = getSavedSessions();
+    const stats = getSavedStats();
+    fetch('/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile, sessions, stats }),
+    }).catch(() => {});
+  } catch {}
+}
 
 export function getSavedStats(): UserStats {
   if (typeof window === 'undefined') {
@@ -62,20 +131,32 @@ export function saveSessions(sessions: QuizSession[]) {
 }
 
 export function upsertSession(session: QuizSession) {
+  const profile = getSavedProfile();
+  const enrichedSession: QuizSession = {
+    ...session,
+    profile_code: session.profile_code || profile.profileCode,
+    device_id: session.device_id || profile.deviceId,
+    student_ip: session.student_ip || profile.ip,
+  };
+
   const sessions = getSavedSessions();
-  const idx = sessions.findIndex(s => s.id === session.id);
+  const idx = sessions.findIndex(s => s.id === enrichedSession.id);
   const wasCompleted = idx >= 0 && sessions[idx].status === 'completed';
 
   if (idx >= 0) {
-    sessions[idx] = session;
+    sessions[idx] = enrichedSession;
   } else {
-    sessions.unshift(session);
+    sessions.unshift(enrichedSession);
   }
   saveSessions(sessions);
 
-  if (session.status === 'completed' && !wasCompleted) {
+  if (enrichedSession.status === 'completed' && !wasCompleted) {
     const current = getSavedStats();
     saveStats({ ...current, completedQuizzes: (current.completedQuizzes || 0) + 1 });
+  }
+
+  if (enrichedSession.status === 'completed') {
+    syncProgressToServer(profile);
   }
 }
 

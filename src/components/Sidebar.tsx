@@ -10,12 +10,13 @@ import {
   BarChart3, 
   Sparkles,
   Download,
-  Upload
+  Upload,
+  ShieldCheck
 } from 'lucide-react';
 import { UserStats } from '@/types';
 import { exportAllData, importAllData } from '@/lib/storage';
 
-export type NavItem = 'dashboard' | 'practice' | 'tutor' | 'riddles' | 'history' | 'progress';
+export type NavItem = 'dashboard' | 'practice' | 'tutor' | 'riddles' | 'history' | 'progress' | 'parent';
 
 interface SidebarProps {
   currentTab: NavItem;
@@ -41,6 +42,7 @@ export default function Sidebar({
     { id: 'riddles' as NavItem, label: 'Đố Vui Trí Tuệ', icon: Gamepad2, color: 'text-pink-600' },
     { id: 'history' as NavItem, label: 'Bài Tập Đã Làm', icon: History, color: 'text-emerald-600' },
     { id: 'progress' as NavItem, label: 'Báo Cáo & Tiến Độ', icon: BarChart3, color: 'text-purple-600' },
+    { id: 'parent' as NavItem, label: 'Góc Phụ Huynh', icon: ShieldCheck, color: 'text-rose-600' },
   ];
 
   const handleExport = () => {

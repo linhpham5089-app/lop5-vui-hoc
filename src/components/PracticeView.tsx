@@ -19,14 +19,14 @@ import {
   Award,
   Lightbulb
 } from 'lucide-react';
-import { Question, SubjectKey, QuizSession, SessionAnswer } from '@/types';
+import { Question, SubjectKey, QuizSession, SessionAnswer, AttemptRecord } from '@/types';
 import { SUBJECTS } from '@/data/curriculum';
 import { FOUR_SKILLS_QUESTIONS } from '@/data/fourSkillsSeed';
 import { MATH_SEED_QUESTIONS } from '@/data/mathSeed';
 import { FLYERS_SEED_QUESTIONS } from '@/data/flyersSeed';
 import { VIETNAMESE_SEED_QUESTIONS } from '@/data/vietnameseSeed';
 import { speakText, startSpeechRecognition } from '@/lib/speech';
-import { upsertSession } from '@/lib/storage';
+import { upsertSession, getSavedProfile } from '@/lib/storage';
 
 interface PracticeViewProps {
   initialSubject?: SubjectKey;
@@ -394,6 +394,18 @@ export default function PracticeView({
       maxScore: roundedMax
     });
 
+    const profile = getSavedProfile();
+    const newAttempt: AttemptRecord = {
+      attemptNumber: nextSubmitCount,
+      submittedAt: new Date().toISOString(),
+      totalScore: finalScore,
+      maxScore: roundedMax,
+      correctCount,
+      wrongCount,
+      blankCount,
+      penaltyPoints,
+    };
+
     const updatedSession: QuizSession = {
       ...currentSession,
       status: 'completed',
@@ -402,6 +414,10 @@ export default function PracticeView({
       max_score: roundedMax,
       mcq_correct: mcqCorrect,
       mcq_total: mcqTotal,
+      profile_code: profile.profileCode,
+      device_id: profile.deviceId,
+      student_ip: profile.ip,
+      attempts: [...(currentSession.attempts || []), newAttempt],
       ai_summary: `Hoàn thành ${currentSession.subject} (Lần ${nextSubmitCount}/3): ${finalScore}/${roundedMax} điểm (Đúng: ${correctCount}, Sai: ${wrongCount}, Bỏ trống: ${blankCount}).`
     };
 

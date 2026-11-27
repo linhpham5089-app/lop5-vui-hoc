@@ -42,6 +42,26 @@ export interface SessionAnswer {
   reviewed?: boolean;
 }
 
+export interface AttemptRecord {
+  attemptNumber: number;
+  submittedAt: string;
+  totalScore: number;
+  maxScore: number;
+  correctCount: number;
+  wrongCount: number;
+  blankCount: number;
+  penaltyPoints: number;
+}
+
+export interface StudentProfile {
+  profileCode: string;
+  ip: string;
+  deviceId: string;
+  alias: string;
+  parentPin: string;
+  updatedAt: string;
+}
+
 export interface QuizSession {
   id: string;
   created_at: string;
@@ -55,6 +75,10 @@ export interface QuizSession {
   mcq_correct?: number;
   mcq_total?: number;
   ai_summary?: string;
+  profile_code?: string;
+  device_id?: string;
+  student_ip?: string;
+  attempts?: AttemptRecord[];
 }
 
 export interface Riddle {
